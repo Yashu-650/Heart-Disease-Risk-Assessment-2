@@ -1,0 +1,9 @@
+.venv
+.venv_new
+__pycache__/
+*.py[cod]
+*$py.class
+.env
+.DS_Store
+*.log
+database/heart_disease.db
