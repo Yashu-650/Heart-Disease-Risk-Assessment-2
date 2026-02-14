@@ -1555,6 +1555,39 @@ table tbody tr:hover {
     font-size: 1rem;
 }
 
+/* Medical Disclaimer Styling */
+.medical-disclaimer {
+    margin-top: 3rem;
+    padding: 2rem;
+    background: rgba(255, 191, 0, 0.05);
+    border: 1px solid rgba(255, 191, 0, 0.15);
+    border-radius: 20px;
+    display: flex;
+    gap: 1.5rem;
+    align-items: flex-start;
+}
+
+.medical-disclaimer i {
+    font-size: 1.5rem;
+    color: #fbbf24;
+    margin-top: 3px;
+}
+
+.disclaimer-content strong {
+    display: block;
+    color: #fbbf24;
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+    font-weight: 800;
+}
+
+.disclaimer-content p {
+    color: #94a3b8;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin: 0;
+}
+
 /* Responsive Mobile */
 /* Responsive Mobile - Enhanced Transitions */
 @media (max-width: 768px) {
