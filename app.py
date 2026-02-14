@@ -330,7 +330,7 @@ def predict():
             return jsonify({'error': 'Missing required fields'}), 400
         
         # Prepare feature array
-        features = np.array([[
+        input_data = [
             data['age'],
             data['sex'],
             data['chest_pain_type'],
@@ -344,15 +344,27 @@ def predict():
             data['st_slope'],
             data['major_vessels'],
             data['thalassemia']
-        ]])
+        ]
+        
+        # Use pandas DataFrame to include feature names and avoid scikit-learn warnings
+        import pandas as pd
+        feature_names = MODELS.get('feature_names')
+        if feature_names:
+            features = pd.DataFrame([input_data], columns=feature_names)
+        else:
+            features = np.array([input_data])
         
         # Scale features if scaler available
         try:
             if 'scaler' in MODELS:
                 scaled_features = MODELS['scaler'].transform(features)
+                # Keep as DataFrame if original was DataFrame
+                if feature_names:
+                    scaled_features = pd.DataFrame(scaled_features, columns=feature_names)
             else:
                 scaled_features = features
-        except:
+        except Exception as e:
+            print(f"[WARNING] Scaling failed: {e}")
             scaled_features = features
         
         # Get predictions from all available models

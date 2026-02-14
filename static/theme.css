@@ -1726,6 +1726,104 @@ table tbody tr:hover {
         padding: 0.8rem 1.5rem;
     }
 
+    /* Stats Bar - Official Dashboard Look */
+    .stats-bar-premium {
+        display: flex;
+        gap: 1.5rem;
+        margin: 2.5rem 0;
+        flex-wrap: wrap;
+    }
+
+    .stat-pill {
+        flex: 1;
+        min-width: 200px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        padding: 1.25rem 1.5rem;
+        border-radius: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+        transition: all 0.3s var(--ease);
+    }
+
+    .stat-pill:hover {
+        background: rgba(255, 255, 255, 0.06);
+        border-color: var(--primary);
+        transform: translateY(-5px);
+    }
+
+    .stat-val {
+        font-size: 1.4rem;
+        font-weight: 800;
+        color: white;
+    }
+
+    .stat-lab {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 600;
+    }
+
+    /* Certified Badges - About Page */
+    .certified-badges {
+        display: flex;
+        gap: 1.5rem;
+        margin-top: 3rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .badge-item {
+        padding: 0.6rem 1.2rem;
+        background: rgba(16, 185, 129, 0.05);
+        border: 1px solid rgba(16, 185, 129, 0.2);
+        border-radius: 50px;
+        color: #10b981;
+        font-size: 0.85rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.05);
+    }
+
+    /* Scrollbar - Official Look */
+    ::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: #050a14;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: var(--primary);
+    }
+
+    /* Mobile Adjustments for Badges and Stats */
+    @media (max-width: 768px) {
+        .stats-bar-premium {
+            flex-direction: column;
+        }
+
+        .stat-pill {
+            min-width: 100%;
+        }
+
+        .badge-item {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+
     /* Diet Plan Mobile Fixes */
     .diet-grid {
         grid-template-columns: 1fr;
