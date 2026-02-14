@@ -11,8 +11,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=42">
-    <link rel="stylesheet" href="{{ url_for('static', filename='theme.css') }}?v=42">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=45">
+    <link rel="stylesheet" href="{{ url_for('static', filename='theme.css') }}?v=45">
 </head>
 
 <body>
@@ -22,7 +22,7 @@
     <div class="intro-overlay" id="introOverlay">
         <div class="intro-card">
             <div class="intro-logo"><i class="fa-solid fa-heart-pulse"></i></div>
-            <h1 class="intro-title">HeartGuard</h1>
+            <h1 class="intro-title">HeartGuard - Advanced Risk Assessment</h1>
             <p class="intro-subtitle">Professional Cardiac Analysis System</p>
 
             <form class="intro-login-form" onsubmit="handleLandingLogin(event)">
@@ -53,7 +53,7 @@
         </button>
         <div class="brand-mobile">
             <div class="logo-icon-sm"><i class="fa-solid fa-heart-pulse"></i></div>
-            <span>HeartGuard</span>
+            <span>HeartGuard - Advanced Risk Assessment</span>
         </div>
     </div>
 
@@ -63,7 +63,7 @@
             <button class="close-sidebar" onclick="toggleSidebar()"><i class="fa-solid fa-xmark"></i></button>
             <div class="brand">
                 <div class="logo-icon"><i class="fa-solid fa-heart-pulse"></i></div>
-                <span>HeartGuard</span>
+                <span>HeartGuard - Advanced Risk Assessment</span>
             </div>
 
             <ul class="nav-links">
@@ -565,6 +565,26 @@
                 </div>
 
                 <div class="details-message" id="detailsMsg"></div>
+
+                <!-- Complete prediction details -->
+                <div class="details-advice-container">
+                    <h3 class="section-title-mini">Recommended Precautions</h3>
+                    <ul id="detPrecautionsList" class="check-list-mini">
+                        <!-- Populated by JS -->
+                    </ul>
+
+                    <h3 class="section-title-mini">Dietary Guidance</h3>
+                    <div class="diet-grid-mini">
+                        <div class="diet-col">
+                            <h4 class="text-success">Authorized Foods</h4>
+                            <ul id="detDietEatList" class="diet-list-mini"></ul>
+                        </div>
+                        <div class="diet-col">
+                            <h4 class="text-danger">Restricted Foods</h4>
+                            <ul id="detDietAvoidList" class="diet-list-mini"></ul>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <button class="btn btn-primary full-width" onclick="closeHistoryDetails()">Close</button>
@@ -600,7 +620,7 @@
         </div>
     </div>
 
-    <script src="{{ url_for('static', filename='script.js') }}?v=30"></script>
+    <script src="{{ url_for('static', filename='script.js') }}?v=45"></script>
 </body>
 
 </html>

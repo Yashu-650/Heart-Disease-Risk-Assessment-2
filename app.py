@@ -423,6 +423,18 @@ def predict():
         print(f"Error in prediction: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
+@app.route('/api/get-content', methods=['GET'])
+def get_content():
+    """Get precautions and diet plan for a specific risk level"""
+    risk_level = request.args.get('risk_level')
+    if not risk_level:
+        return jsonify({'error': 'Risk level required'}), 400
+    
+    return jsonify({
+        'precautions': get_precautions(risk_level),
+        'diet_plan': get_diet_plan(risk_level)
+    }), 200
+
 @app.route('/api/history', methods=['GET'])
 def get_history():
     """Get prediction history from database"""
@@ -564,7 +576,7 @@ if __name__ == '__main__':
     
     # Run Flask app
     print("=" * 60)
-    print("HEART DISEASE PREDICTION SYSTEM")
+    print("HEARTGUARD - ADVANCED RISK ASSESSMENT")
     print("=" * 60)
     print("[SERVER] Server running on http://localhost:5000")
     print("Press CTRL+C to stop")

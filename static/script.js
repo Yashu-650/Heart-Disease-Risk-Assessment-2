@@ -22,6 +22,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initial state for history API
     history.replaceState({ tab: 'home' }, '', '#home');
+
+    // Windows Enter Key Navigation
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            const activeEl = document.activeElement;
+            if (activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'SELECT')) {
+                e.preventDefault();
+                const form = activeEl.closest('form');
+                if (form) {
+                    const inputs = Array.from(form.querySelectorAll('input:not([type="hidden"]), select'));
+                    const index = inputs.indexOf(activeEl);
+                    if (index > -1 && index < inputs.length - 1) {
+                        inputs[index + 1].focus();
+                    } else if (index === inputs.length - 1) {
+                        // If it's the last input of a step, click next or submit
+                        const step = activeEl.closest('.form-step');
+                        const nextBtn = step.querySelector('.btn-primary, .btn-submit');
+                        if (nextBtn) nextBtn.click();
+                    }
+                }
+            }
+        }
+    });
 });
 
 // Handle browser back button
@@ -415,6 +438,47 @@ function viewDetails(data) {
 
     document.getElementById('detailsRiskPercent').innerText = `Risk Percentage: ${data.risk_percentage}%`;
     document.getElementById('detailsMsg').innerText = `Diagnosis: ${data.risk_percentage >= 50 ? 'Heart Disease Risk Detected' : 'Low Heart Disease Risk'}`;
+
+    // Fetch and populate advice sections
+    const precList = document.getElementById('detPrecautionsList');
+    const eatList = document.getElementById('detDietEatList');
+    const avoidList = document.getElementById('detDietAvoidList');
+
+    precList.innerHTML = '<li><i class="fa-solid fa-spinner fa-spin"></i> Loading advice...</li>';
+    eatList.innerHTML = '';
+    avoidList.innerHTML = '';
+
+    fetch(`/api/get-content?risk_level=${data.risk_level}`)
+        .then(r => r.json())
+        .then(content => {
+            // Precautions
+            precList.innerHTML = '';
+            content.precautions.precautions.forEach(p => {
+                const li = document.createElement('li');
+                li.innerText = p.replace(/^• /, '');
+                precList.appendChild(li);
+            });
+
+            // Diet Eat
+            eatList.innerHTML = '';
+            content.diet_plan.foods_to_eat.forEach(f => {
+                const li = document.createElement('li');
+                li.innerHTML = f.replace('[OK] ', '<i class="fa-solid fa-check text-success"></i> ');
+                eatList.appendChild(li);
+            });
+
+            // Diet Avoid
+            avoidList.innerHTML = '';
+            content.diet_plan.foods_to_avoid.forEach(f => {
+                const li = document.createElement('li');
+                li.innerHTML = f.replace('[NO] ', '<i class="fa-solid fa-ban text-danger"></i> ');
+                avoidList.appendChild(li);
+            });
+        })
+        .catch(err => {
+            precList.innerHTML = '<li>Error loading advice.</li>';
+            console.error(err);
+        });
 
     modal.classList.add('active');
     document.body.classList.add('no-scroll');
