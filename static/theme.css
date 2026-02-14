@@ -1502,11 +1502,23 @@ body.no-scroll {
 }
 
 .date-filter input {
-    padding: 0.5rem 0.75rem 0.5rem 2.25rem;
+    padding: 0.6rem 1rem 0.6rem 2.5rem;
+    background: rgba(255, 255, 255, 0.05);
     border: 1px solid var(--border);
     border-radius: 50px;
     font-family: inherit;
-    color: var(--text-main);
+    color: white !important;
+    font-size: 0.9rem;
+    outline: none;
+    transition: all 0.3s;
+    color-scheme: dark;
+    /* Makes the calendar popup dark in modern browsers */
+}
+
+.date-filter input:focus {
+    border-color: var(--primary);
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: var(--accent-glow);
 }
 
 .date-filter i {
@@ -1520,13 +1532,19 @@ body.no-scroll {
     background: var(--ref-card-dark);
     border-radius: var(--radius-lg);
     border: 1px solid var(--border);
-    overflow: hidden;
+    overflow-x: auto;
+    /* Enable horizontal scroll */
     margin-top: 2rem;
+    width: 100%;
+    -webkit-overflow-scrolling: touch;
+    /* Smooth scroll on iOS */
 }
 
 table {
     width: 100%;
     border-collapse: collapse;
+    min-width: 600px;
+    /* Ensure table doesn't squish too much */
 }
 
 table thead {
