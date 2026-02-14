@@ -1,834 +1,526 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Heart Disease Prediction - Risk Assessment</title>
-    <!-- Google Font + Font Awesome for polished typography and icons -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <title>HeartGuard - Advanced Risk Assessment</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        /* Modern professional theme */
-        :root{
-            --bg: #f4f6fa;
-            --card: #ffffff;
-            --muted: #6b7280;
-            --accent: #db3b2a; /* warm red */
-            --accent-2: #2b6df6; /* blue highlight */
-            --glass: rgba(255,255,255,0.6);
-            --radius: 14px;
-            --shadow-1: 0 6px 18px rgba(16,24,40,0.08);
-            --shadow-2: 0 10px 40px rgba(16,24,40,0.12);
-        }
-
-        *{box-sizing:border-box;margin:0;padding:0}
-        html,body{height:100%}
-
-        body{
-            font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-            background: radial-gradient(1200px 600px at 10% 10%, rgba(43,109,246,0.06), transparent),
-                        linear-gradient(180deg, var(--bg), #eef2f7);
-            color:#111827;
-            -webkit-font-smoothing:antialiased;
-            -moz-osx-font-smoothing:grayscale;
-            padding:32px;
-            display:flex;
-            justify-content:center;
-            align-items:flex-start;
-        }
-
-        .container{width:100%;max-width:1100px}
-
-        .card{
-            background:linear-gradient(180deg, rgba(255,255,255,0.9), var(--card));
-            border-radius:var(--radius);
-            box-shadow:var(--shadow-2);
-            overflow:hidden;
-            display:grid;
-            grid-template-columns: 1fr; /* default: single column (only main shown) */
-            gap:0;
-        }
-
-        /* When results are visible, show sidebar */
-        .card.show-sidebar{
-            grid-template-columns: 1fr 420px;
-        }
-
-        /* Left: main content */
-        .main {
-            padding:34px;
-        }
-
-        .header{
-            padding:28px 34px;
-            background:linear-gradient(90deg,#0b1220 0%, #0f172a 100%);
-            color:white;
-            display:flex;
-            align-items:center;
-            gap:18px;
-            border-radius:12px;
-            box-shadow: 0 8px 28px rgba(2,6,23,0.35);
-        }
-
-        .header-icon{width:72px;height:72px;border-radius:14px;background:linear-gradient(135deg,var(--accent-2),var(--accent));display:flex;align-items:center;justify-content:center;font-size:30px;box-shadow:var(--shadow-1)}
-
-        .header h1{font-size:22px;font-weight:800;margin:0}
-        .header p{font-size:14px;opacity:.9;margin:0;margin-left:12px}
-        .header{position:relative}
-        .header-actions{position:absolute;right:20px;top:50%;transform:translateY(-50%);display:flex;gap:12px;align-items:center}
-        .login-btn{background:transparent;border:1px solid rgba(255,255,255,0.08);color:#fff;padding:8px 12px;border-radius:10px;cursor:pointer}
-        .login-btn:hover{opacity:0.95}
-        .header-login-circle{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;border:3px solid rgba(255,255,255,0.06);box-shadow:0 8px 24px rgba(2,6,23,0.35);background:linear-gradient(135deg,var(--accent-2),var(--accent))}
-        .header-login-circle i{color:white;font-size:20px}
-
-        .content{padding:28px}
-
-        .tabs{display:flex;gap:12px;margin-bottom:22px}
-        .tab-btn{background:rgba(255,255,255,0.9);border-radius:14px;padding:10px 16px;border:1px solid rgba(16,24,40,0.04);color:var(--muted);font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:8px}
-        .tab-btn:hover{transform:translateY(-2px)}
-        .tab-btn.active{background:linear-gradient(90deg, rgba(235,79,57,0.12), rgba(43,109,246,0.06));color:var(--accent);box-shadow:0 6px 18px rgba(16,24,40,0.06)}
-
-        /* Icon spacing inside tab buttons */
-        .tab-btn i{margin-right:8px}
-
-        .tab-content h2{font-size:18px;margin-bottom:14px}
-        /* Hide non-active tabs by default */
-        .tab-content{display:none}
-        .tab-content.active{display:block}
-
-        .form-section{background:linear-gradient(180deg,#f8fafc, #ffffff);padding:18px;border-radius:12px;margin-bottom:18px;border:1px solid rgba(16,24,40,0.04)}
-        .form-section h3{color:var(--accent);font-size:14px;margin-bottom:12px}
-
-        .form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:12px}
-        .form-group label{font-size:13px;margin-bottom:8px;color:#374151;font-weight:700}
-        .form-group input,.form-group select{padding:14px 14px;border-radius:12px;border:1px solid #e6e9ef;background:#fff;font-size:15px;box-shadow:0 6px 18px rgba(16,24,40,0.02)}
-        .form-group input::placeholder{color:#9aa0a6}
-        .form-group input:focus,.form-group select:focus{outline:none;border-color:var(--accent-2);box-shadow:0 12px 34px rgba(43,109,246,0.08)}
-
-        .btn{background:linear-gradient(90deg,var(--accent),#b02a1f);color:white;padding:12px 18px;border-radius:12px;border:none;font-weight:800;cursor:pointer;letter-spacing:0.2px;box-shadow:0 10px 26px rgba(219,59,42,0.12)}
-        .btn:hover{transform:translateY(-3px);box-shadow:0 22px 40px rgba(16,24,40,0.12)}
-        .btn-secondary{background:#fff;color:#111827;border:1px solid rgba(16,24,40,0.06);box-shadow:0 6px 18px rgba(2,6,23,0.04)}
-
-        /* Right: results column - hidden by default so it doesn't occupy layout space */
-        .sidebar{display:none;background:linear-gradient(180deg, #fbfdff, #ffffff);padding:28px;border-left:1px solid rgba(16,24,40,0.04);opacity:0;transform:translateY(8px);transition:opacity .28s ease, transform .28s ease}
-        .risk-container{border-radius:14px;padding:28px 22px;text-align:center;border:1px solid rgba(16,24,40,0.04);background:linear-gradient(180deg,#ffffff,#fbfbff);box-shadow:0 10px 30px rgba(2,6,23,0.04)}
-        .risk-percentage{font-size:56px;font-weight:900;margin:6px 0;color:var(--accent-2);letter-spacing:0.6px}
-        .risk-diagnosis{font-weight:700;color:#0f172a;margin-bottom:8px}
-        .risk-message{color:var(--muted);font-size:14px}
-
-        /* Subtle progress ring background */
-        .risk-circle{width:160px;height:160px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:12px auto;background:radial-gradient(circle at 50% 50%, #fff 58%, rgba(16,24,40,0.02) 60%);border:8px solid rgba(243,244,246,0.8)}
-        .risk-percentage.low{color:#16a34a}
-        .risk-percentage.moderate{color:#f59e0b}
-        .risk-percentage.high{color:var(--accent)}
-
-        .recommendations-section{margin-top:18px;padding:18px;border-radius:12px;background:#fff;border:1px solid rgba(16,24,40,0.03);box-shadow:0 6px 20px rgba(2,6,23,0.03)}
-        .recommendations-section h3{color:#0f172a;margin:0 0 10px 0}
-        .recommendations-section ul{padding-left:18px}
-
-        /* Results visibility */
-        #results{display:none}
-        #results.show{display:block}
-        /* Make results area a clean card */
-        #results { padding:18px; border-radius:12px; }
-        .results-disclaimer{margin-top:12px;padding-top:10px;border-top:1px dashed rgba(16,24,40,0.04);color:var(--muted);font-size:13px}
-        .results-disclaimer strong{color:var(--accent);font-weight:700;margin-right:6px}
-
-        /* Modal styles */
-        .modal{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;background-color:rgba(0,0,0,0.5);}
-        .modal.show{display:block}
-        .modal-content{background:#fff;margin:5% auto;padding:24px;border-radius:12px;max-width:900px;max-height:80vh;overflow:auto}
-        .close{float:right;font-size:22px;color:#6b7280;cursor:pointer}
-
-        /* Table & modal tweaks */
-        table{width:100%;border-collapse:collapse;background:transparent}
-        table thead tr{background:#0f172a;color:#fff}
-        table th, table td{padding:12px;text-align:left;font-size:13px}
-
-        .modal-content{padding:26px}
-
-        /* Responsive */
-        @media (max-width: 980px){
-            .card{grid-template-columns:1fr}
-            .sidebar{order:2}
-            .main{order:1}
-            .form-row{grid-template-columns:1fr}
-        }
-        /* When sidebar is shown, make it participate in layout and animate it into view */
-        .card.show-sidebar .sidebar{display:block;opacity:1;transform:translateY(0)}
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=29">
+    <link rel="stylesheet" href="{{ url_for('static', filename='theme.css') }}?v=29">
 </head>
+
 <body>
-    <div class="container">
-        <div class="card">
-            <div class="main">
-                <!-- HEADER -->
-            <div class="header">
-                <div class="header-icon">❤️</div>
-                <h1>Heart Disease Risk Assessment</h1>
-                <p>Get your personalized health recommendations</p>
-            </div>
+    <div class="app-background-3d"></div>
 
-            <!-- CONTENT -->
-            <div class="content">
-                <!-- TAB NAVIGATION -->
-                <div class="tabs">
-                    <button class="tab-btn active" onclick="switchTab(event, 'input')"><i class="fa-solid fa-notes-medical"></i> Health Assessment</button>
-                    <button class="tab-btn" onclick="switchTab(event, 'history')"><i class="fa-solid fa-history"></i> History</button>
-                    <button class="tab-btn" onclick="switchTab(event, 'about')"><i class="fa-solid fa-circle-info"></i> About</button>
+    <!-- 3D Intro / Login Overlay -->
+    <div class="intro-overlay" id="introOverlay">
+        <div class="intro-card">
+            <div class="intro-logo"><i class="fa-solid fa-heart-pulse"></i></div>
+            <h1 class="intro-title">HeartGuard</h1>
+            <p class="intro-subtitle">Sign in to access your health analytics</p>
+
+            <form class="intro-login-form" onsubmit="handleLandingLogin(event)">
+                <div class="input-group-3d">
+                    <i class="fa-solid fa-user"></i>
+                    <input type="text" id="landingUser" placeholder="Username" required>
                 </div>
-
-                <!-- INPUT TAB -->
-                <div id="input" class="tab-content active">
-                    <h2>Enter Your Health Information</h2>
-                    <form onsubmit="makePrediction(event)">
-                        <div class="form-section">
-                            <h3>Personal Information</h3>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label>Age (years)</label>
-                                    <input type="number" id="age" min="1" max="150" required>
-                                </div>
-                                <div class="form-group">
-                                    <label>Sex</label>
-                                    <select id="sex" required>
-                                        <option value="">Select</option>
-                                        <option value="1">Male</option>
-                                        <option value="0">Female</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-section">
-                            <h3>Medical Information</h3>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label>Chest Pain Type</label>
-                                    <select id="chest_pain_type" required>
-                                        <option value="">Select</option>
-                                        <option value="0">Typical Angina</option>
-                                        <option value="1">Atypical Angina</option>
-                                        <option value="2">Non-anginal Pain</option>
-                                        <option value="3">Asymptomatic</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label>Resting Blood Pressure (mmHg)</label>
-                                    <input type="number" id="resting_blood_pressure" min="40" placeholder="e.g., 120" required>
-                                </div>
-                            </div>
-
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label>Cholesterol (mg/dl)</label>
-                                    <input type="number" id="cholesterol" min="0" placeholder="e.g., 200-300" required>
-                                </div>
-                                <div class="form-group">
-                                    <label>Fasting Blood Sugar > 120</label>
-                                    <select id="fasting_blood_sugar" required>
-                                        <option value="">Select</option>
-                                        <option value="0">No</option>
-                                        <option value="1">Yes</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label>Resting ECG</label>
-                                    <select id="resting_ecg" required>
-                                        <option value="">Select</option>
-                                        <option value="0">Normal</option>
-                                        <option value="1">ST-T Abnormality</option>
-                                        <option value="2">LV Hypertrophy</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label>Max Heart Rate (bpm)</label>
-                                    <input type="number" id="max_heart_rate" min="40" placeholder="e.g., 150-200" required>
-                                </div>
-                            </div>
-
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label>Exercise Induced Angina</label>
-                                    <select id="exercise_induced_angina" required>
-                                        <option value="">Select</option>
-                                        <option value="0">No</option>
-                                        <option value="1">Yes</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label>ST Depression</label>
-                                    <input type="number" id="st_depression" step="0.1" min="0" placeholder="e.g., 0.5-2.0" required>
-                                </div>
-                            </div>
-
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label>ST Slope</label>
-                                    <select id="st_slope" required>
-                                        <option value="">Select</option>
-                                        <option value="0">Upsloping</option>
-                                        <option value="1">Flat</option>
-                                        <option value="2">Downsloping</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label>Major Vessels</label>
-                                    <select id="major_vessels" required>
-                                        <option value="">Select</option>
-                                        <option value="0">0</option>
-                                        <option value="1">1</option>
-                                        <option value="2">2</option>
-                                        <option value="3">3</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label>Thalassemia</label>
-                                    <select id="thalassemia" required>
-                                        <option value="">Select</option>
-                                        <option value="0">Normal</option>
-                                        <option value="1">Fixed Defect</option>
-                                        <option value="2">Reversible Defect</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <button type="submit" class="btn">🔍 Assess Heart Health</button>
-                    </form>
-
-                    <!-- LOADING ANIMATION -->
-                    <div class="loading" id="loading">
-                        <div class="spinner"></div>
-                        <p>Analyzing your health data...</p>
-                    </div>
-
-                    <!-- ERROR MESSAGE -->
-                    <div id="errorMessage" class="error-message"></div>
-
-                
-        </div>
-
-        <aside class="sidebar">
-            <!-- SIDEBAR: Results & Summary -->
-            <div style="text-align:center;margin-bottom:18px;">
-                <div style="font-weight:700;color:var(--accent);">Heart Disease Risk</div>
-                <div style="color:var(--muted);font-size:13px;">Personalized assessment</div>
-            </div>
-
-            <!-- RESULTS SECTION (moved) -->
-            <div id="results">
-                <h2 style="margin-top:0">Your Health Assessment Results</h2>
-                <div id="riskContainer" class="risk-container">
-                    <!-- risk content injected here -->
+                <div class="input-group-3d">
+                    <i class="fa-solid fa-lock"></i>
+                    <input type="password" id="landingPass" placeholder="Password" required>
                 </div>
-                <div id="precautionsContainer" class="recommendations-section"></div>
-                <div id="dietContainer" class="recommendations-section foods-section"></div>
-                <div id="timestamp" class="timestamp" style="margin-top:10px;color:var(--muted);"></div>
-                <div class="results-disclaimer">This assessment is for informational purposes only and is not a medical diagnosis or confirmation. Please consult a qualified healthcare professional for diagnosis, confirmation, and treatment.</div>
-                <div style="margin-top:14px;display:flex;gap:10px;justify-content:center"><button type="button" class="btn btn-secondary" onclick="clearResults()">Clear Results</button></div>
-            </div>
-        </aside>
+                <button type="submit" class="btn-intro">Sign In</button>
+            </form>
 
-                <!-- HISTORY TAB -->
-                <div id="history" class="tab-content">
-                    <h2>Previous Assessments</h2>
-                    <button type="button" class="btn btn-small" onclick="loadHistory()">Load History</button>
-                    <button type="button" class="btn btn-secondary btn-small" onclick="clearDatabase()">Clear All History</button>
-                    <div id="historyContainer"></div>
-                </div>
-
-                <!-- HISTORY DETAIL MODAL -->
-                <div id="historyModal" class="modal">
-                    <div class="modal-content">
-                        <span class="close" onclick="closeHistoryModal()">&times;</span>
-                        <h2>Assessment Details</h2>
-                        <div id="historyDetails"></div>
-                    </div>
-                </div>
-
-                <!-- LOGIN MODAL -->
-                <div id="loginModal" class="modal">
-                    <div class="modal-content" style="max-width:420px">
-                        <span class="close" onclick="closeLoginModal()">&times;</span>
-                        <h2>Sign In</h2>
-                        <div style="margin-top:12px">
-                            <label style="font-weight:700">Username</label>
-                            <input id="loginUsername" class="form-group" style="width:100%;padding:10px;border-radius:8px;border:1px solid #e6e9ef;margin-top:6px">
-                        </div>
-                        <div style="margin-top:12px">
-                            <label style="font-weight:700">Password</label>
-                            <input id="loginPassword" type="password" class="form-group" style="width:100%;padding:10px;border-radius:8px;border:1px solid #e6e9ef;margin-top:6px">
-                        </div>
-                        <div style="margin-top:16px;display:flex;gap:8px;justify-content:flex-end">
-                            <button class="btn btn-secondary" onclick="closeLoginModal()">Cancel</button>
-                            <button class="btn" onclick="login()">Sign In</button>
-                        </div>
-                        <div id="loginError" style="color:#b02a1f;margin-top:12px;display:none"></div>
-                    </div>
-                </div>
-
-                <!-- ABOUT TAB -->
-                <div id="about" class="tab-content">
-                    <h2>About This Assessment</h2>
-                    <div class="info-box">
-                        <h3>🏥 How This Works</h3>
-                        <p>This system uses 6 advanced Machine Learning algorithms to assess your heart disease risk based on medical data:</p>
-                        <ul>
-                            <li><strong>K-Nearest Neighbor (KNN):</strong> Compares your data with similar patients</li>
-                            <li><strong>Decision Tree:</strong> Uses medical decision rules</li>
-                            <li><strong>Naive Bayes:</strong> Uses probability calculations</li>
-                            <li><strong>Support Vector Machine:</strong> Finds disease patterns</li>
-                            <li><strong>Logistic Regression:</strong> Statistical prediction</li>
-                            <li><strong>Neural Network:</strong> Deep learning analysis</li>
-                        </ul>
-                    </div>
-
-                    <div class="info-box">
-                        <h3>📊 Understanding Your Results</h3>
-                        <ul>
-                            <li><strong>Risk Percentage:</strong> Probability of heart disease (0-100%)</li>
-                            <li><strong>Low Risk (0-33%):</strong> Continue healthy habits</li>
-                            <li><strong>Moderate Risk (34-66%):</strong> Take preventive measures</li>
-                            <li><strong>High Risk (67-100%):</strong> Consult cardiologist immediately</li>
-                        </ul>
-                    </div>
-
-                    <div class="info-box">
-                        <h3>⚠️ Important Disclaimer</h3>
-                        <p>This tool is for educational and informational purposes only. It is NOT a substitute for professional medical advice. Please consult with a healthcare professional for proper diagnosis and treatment.</p>
-                    </div>
-                </div>
+            <div class="guest-access">
+                <a href="#" onclick="enterAppAsGuest()">Continue as Guest <i class="fa-solid fa-arrow-right"></i></a>
             </div>
         </div>
     </div>
 
-    <script>
-        function switchTab(event, tabName) {
-            event.preventDefault();
-            
-            document.querySelectorAll('.tab-content').forEach(el => {
-                el.classList.remove('active');
-            });
-            
-            document.querySelectorAll('.tab-btn').forEach(el => {
-                el.classList.remove('active');
-            });
-            
-            document.getElementById(tabName).classList.add('active');
-            event.target.classList.add('active');
-            // Hide sidebar/results whenever switching tabs
-            const resultsEl = document.getElementById('results');
-            if (resultsEl) resultsEl.classList.remove('show');
-            const card = document.querySelector('.card');
-            if (card) { card.classList.remove('show-sidebar'); }
-        }
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
 
-        function makePrediction(event) {
-            event.preventDefault();
+    <!-- Mobile Header with Hamburger -->
+    <div class="mobile-header">
+        <button class="menu-toggle" onclick="toggleSidebar()">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+        <div class="brand-mobile">
+            <div class="logo-icon-sm"><i class="fa-solid fa-heart-pulse"></i></div>
+            <span>HeartGuard</span>
+        </div>
+    </div>
 
-            const formData = {
-                age: parseInt(document.getElementById('age').value),
-                sex: parseInt(document.getElementById('sex').value),
-                chest_pain_type: parseInt(document.getElementById('chest_pain_type').value),
-                resting_blood_pressure: parseInt(document.getElementById('resting_blood_pressure').value),
-                cholesterol: parseInt(document.getElementById('cholesterol').value),
-                fasting_blood_sugar: parseInt(document.getElementById('fasting_blood_sugar').value),
-                resting_ecg: parseInt(document.getElementById('resting_ecg').value),
-                max_heart_rate: parseInt(document.getElementById('max_heart_rate').value),
-                exercise_induced_angina: parseInt(document.getElementById('exercise_induced_angina').value),
-                st_depression: parseFloat(document.getElementById('st_depression').value),
-                st_slope: parseInt(document.getElementById('st_slope').value),
-                major_vessels: parseInt(document.getElementById('major_vessels').value),
-                thalassemia: parseInt(document.getElementById('thalassemia').value)
-            };
+    <div class="app-container">
+        <!-- Sidebar Navigation (Reference Design) -->
+        <nav class="sidebar" id="sidebar">
+            <button class="close-sidebar" onclick="toggleSidebar()"><i class="fa-solid fa-xmark"></i></button>
+            <div class="brand">
+                <div class="logo-icon"><i class="fa-solid fa-heart-pulse"></i></div>
+                <span>HeartGuard</span>
+            </div>
 
-            document.getElementById('loading').style.display = 'block';
-            document.getElementById('results').classList.remove('show');
-            document.getElementById('errorMessage').classList.remove('show');
+            <ul class="nav-links">
+                <li class="active" onclick="switchTab(event, 'home')">
+                    <i class="fa-solid fa-house"></i>
+                    <span>Home</span>
+                </li>
+                <li onclick="switchTab(event, 'assessment')">
+                    <i class="fa-solid fa-stethoscope"></i>
+                    <span>Checkup</span>
+                </li>
+                <li onclick="switchTab(event, 'history')">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                    <span>History</span>
+                </li>
+                <li onclick="switchTab(event, 'about')">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <span>About</span>
+                </li>
+            </ul>
 
-            fetch('/api/predict', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(formData)
-            })
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('loading').style.display = 'none';
-                displayResults(data);
-            })
-            .catch(error => {
-                document.getElementById('loading').style.display = 'none';
-                showErrorMessage('Error: ' + error.message);
-            });
-        }
+            <div class="user-profile" id="userProfile">
+                <div class="login-card-ref">
+                    <p class="login-text-ref">MEMBER LOGIN</p>
+                    <button class="login-btn-ref" onclick="openLoginModal()">
+                        <i class="fa-solid fa-user"></i> Sign In
+                    </button>
+                </div>
+            </div>
+        </nav>
 
-        function displayResults(data) {
-            let riskColor = 'low';
-            if (data.risk_percentage >= 67) {
-                riskColor = 'high';
-            } else if (data.risk_percentage >= 34) {
-                riskColor = 'moderate';
-            }
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Top Header (Desktop Only) -->
+            <header class="top-bar desktop-only">
+                <div class="user-welcome">
+                    <h1 id="welcomeUser">Hello, Guest!</h1>
+                    <p>Track your heart health today.</p>
+                </div>
+                <div class="header-actions">
+                    <button class="icon-btn notification-btn"><i class="fa-regular fa-bell"></i></button>
+                    <div class="date-display" id="currentDate"></div>
+                </div>
+            </header>
 
-            let riskHTML = `
-                <div class="risk-diagnosis">${data.diagnosis}</div>
-                <div class="risk-percentage ${riskColor}">${data.risk_percentage}%</div>
-                <div class="risk-message">${data.message}</div>
-            `;
-
-            document.getElementById('riskContainer').innerHTML = riskHTML;
-
-            let precautionsHTML = `<h3>${data.precautions.title}</h3><ul>`;
-            data.precautions.precautions.forEach(precaution => {
-                precautionsHTML += `<li>${precaution}</li>`;
-            });
-            precautionsHTML += `</ul>`;
-            document.getElementById('precautionsContainer').innerHTML = precautionsHTML;
-
-            let dietHTML = `<h3>${data.diet_plan.title}</h3><h4>✓ Foods to Eat:</h4><ul>`;
-            data.diet_plan.foods_to_eat.forEach(food => {
-                dietHTML += `<li>${food}</li>`;
-            });
-            dietHTML += `</ul><h4 class="avoid">✗ Foods to Avoid:</h4><ul>`;
-            data.diet_plan.foods_to_avoid.forEach(food => {
-                dietHTML += `<li>${food}</li>`;
-            });
-            dietHTML += `</ul>`;
-            document.getElementById('dietContainer').innerHTML = dietHTML;
-
-            const timestamp = new Date(data.timestamp).toLocaleString();
-            document.getElementById('timestamp').innerHTML = `<strong>Assessment Time:</strong> ${timestamp}`;
-
-            // Update disclaimer text when showing results
-            const disc = document.querySelector('.results-disclaimer');
-            if (disc) {
-                disc.innerHTML = `<strong>Disclaimer:</strong> This assessment is for informational purposes only and is not a medical diagnosis or confirmation. Consult a qualified healthcare professional for diagnosis, confirmation, and treatment.`;
-            }
-
-            document.getElementById('results').classList.add('show');
-            // Show sidebar column when results are displayed
-            const card = document.querySelector('.card');
-            if(card){ card.classList.add('show-sidebar'); }
-            document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
-        }
-
-        function showErrorMessage(message) {
-            document.getElementById('errorMessage').innerHTML = message;
-            document.getElementById('errorMessage').classList.add('show');
-        }
-
-        function clearResults() {
-            document.querySelector('form').reset();
-            document.getElementById('results').classList.remove('show');
-            document.getElementById('errorMessage').classList.remove('show');
-            document.getElementById('loading').style.display = 'none';
-            const card = document.querySelector('.card');
-            if(card){ card.classList.remove('show-sidebar'); }
-        }
-
-        function loadHistory() {
-            fetch('/api/history')
-            .then(response => response.json())
-            .then(data => {
-                const historyContainer = document.getElementById('historyContainer');
-                
-                if (!data.history || data.history.length === 0) {
-                    historyContainer.innerHTML = '<p>No history found</p>';
-                    return;
-                }
-
-                let html = '<table><thead><tr style="background: #e74c3c; color: white;"><th>Date & Time</th><th>Age</th><th>BP (mmHg)</th><th>Cholesterol</th><th>Risk %</th><th>Risk Level</th><th>Click for Details</th></tr></thead><tbody>';
-
-                data.history.forEach((record, index) => {
-                    const date = new Date(record.created_at).toLocaleString();
-                    html += `<tr onclick="showHistoryDetails(${index}, '${date}', ${record.age}, ${record.resting_blood_pressure}, ${record.cholesterol}, ${record.risk_percentage}, '${record.risk_level}')"><td>${date}</td><td>${record.age}</td><td>${record.resting_blood_pressure}</td><td>${record.cholesterol}</td><td><strong>${record.risk_percentage.toFixed(1)}%</strong></td><td>${record.risk_level.replace(/_/g, ' ')}</td><td>📖</td></tr>`;
-                });
-
-                html += '</tbody></table>';
-                historyContainer.innerHTML = html;
-            });
-        }
-
-        function showHistoryDetails(index, date, age, bp, cholesterol, riskPercentage, riskLevel) {
-            const precautions = getPrecautionsByRiskLevel(riskLevel);
-            const dietPlan = getDietPlanByRiskLevel(riskLevel);
-
-            let riskColor = 'low';
-            if (riskPercentage >= 67) {
-                riskColor = 'high';
-            } else if (riskPercentage >= 34) {
-                riskColor = 'moderate';
-            }
-
-            let detailsHTML = `
-                <div style="margin-bottom: 20px;">
-                    <p><strong>Date & Time:</strong> ${date}</p>
-                    <p><strong>Age:</strong> ${age} years</p>
-                    <p><strong>Resting Blood Pressure:</strong> ${bp} mmHg</p>
-                    <p><strong>Cholesterol:</strong> ${cholesterol} mg/dl</p>
+            <!-- Home Dashboard View (Default) -->
+            <div id="home" class="view-section active">
+                <!-- Hero Banner -->
+                <div class="hero-banner">
+                    <div class="hero-content">
+                        <h2>Check Your<br>Heart Risk</h2>
+                        <p>AI-powered assessment in minutes.</p>
+                        <button class="btn btn-light" onclick="switchTab(null, 'assessment')">Start Now <i
+                                class="fa-solid fa-arrow-right"></i></button>
+                    </div>
+                    <div class="hero-image">
+                        <i class="fa-solid fa-user-doctor"></i>
+                    </div>
                 </div>
 
-                <div class="risk-container" style="margin: 20px 0;">
-                    <div class="risk-percentage ${riskColor}">${riskPercentage.toFixed(1)}%</div>
-                    <div class="risk-diagnosis">${riskPercentage >= 50 ? 'Heart Disease Risk Detected' : 'Low Heart Disease Risk'}</div>
+                <!-- Feature Grid -->
+                <h3 class="section-title">Quick Actions</h3>
+                <div class="feature-grid-home">
+                    <div class="feature-item" onclick="switchTab(null, 'assessment')">
+                        <div class="feature-icon bg-blue"><i class="fa-solid fa-stethoscope"></i></div>
+                        <span>Checkup</span>
+                    </div>
+                    <div class="feature-item" onclick="switchTab(null, 'history')">
+                        <div class="feature-icon bg-green"><i class="fa-solid fa-clock-rotate-left"></i></div>
+                        <span>History</span>
+                    </div>
+                    <div class="feature-item" onclick="openLoginModal()">
+                        <div class="feature-icon bg-purple"><i class="fa-solid fa-user-lock"></i></div>
+                        <span>Login</span>
+                    </div>
+                    <div class="feature-item" onclick="switchTab(null, 'about')">
+                        <div class="feature-icon bg-orange"><i class="fa-solid fa-circle-info"></i></div>
+                        <span>About</span>
+                    </div>
                 </div>
 
-                <div class="recommendations-section">
-                    <h3>${precautions.title}</h3>
-                    <ul>
-                        ${precautions.precautions.map(p => `<li>${p}</li>`).join('')}
-                    </ul>
+                <!-- Recent Activity / Doctor Promo -->
+                <h3 class="section-title">Medical Assistant</h3>
+                <div class="doctor-card">
+                    <img src="https://img.freepik.com/free-photo/woman-doctor-wearing-lab-coat-with-stethoscope-isolated_1303-29791.jpg"
+                        alt="Dr. AI" class="doc-img">
+                    <div class="doc-info">
+                        <h4>Dr. HeartGuard AI</h4>
+                        <p>Virtual Assistant</p>
+                    </div>
+                    <button class="btn-icon-small"><i class="fa-solid fa-comment-medical"></i></button>
                 </div>
+            </div>
 
-                <div class="recommendations-section foods-section">
-                    <h3>${dietPlan.title}</h3>
-                    <h4>✓ Foods to Eat:</h4>
-                    <ul>
-                        ${dietPlan.foods_to_eat.map(f => `<li>${f}</li>`).join('')}
-                    </ul>
-                    <h4 class="avoid">✗ Foods to Avoid:</h4>
-                    <ul>
-                        ${dietPlan.foods_to_avoid.map(f => `<li>${f}</li>`).join('')}
-                    </ul>
+            <!-- Assessment View -->
+            <div id="assessment" class="view-section">
+                <div class="assessment-container">
+                    <!-- Progress Stepper -->
+                    <div class="stepper">
+                        <div class="step active" data-step="1">
+                            <div class="step-circle">1</div>
+                            <div class="step-label">Personal</div>
+                        </div>
+                        <div class="step-line"></div>
+                        <div class="step" data-step="2">
+                            <div class="step-circle">2</div>
+                            <div class="step-label">Vitals</div>
+                        </div>
+                        <div class="step-line"></div>
+                        <div class="step" data-step="3">
+                            <div class="step-circle">3</div>
+                            <div class="step-label">Clinical</div>
+                        </div>
+                    </div>
+
+                    <!-- Multi-step Form -->
+                    <form id="assessmentForm" onsubmit="return false;">
+
+                        <!-- Step 1: Personal Info -->
+                        <div class="form-step active" id="step1">
+                            <h3>Personal Information</h3>
+                            <div class="grid-2">
+                                <div class="form-group">
+                                    <label>Age (years)</label>
+                                    <div class="input-wrapper">
+                                        <i class="fa-solid fa-cake-candles"></i>
+                                        <input type="number" id="age" min="1" max="120" placeholder="e.g. 45" required>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Sex</label>
+                                    <div class="input-wrapper">
+                                        <i class="fa-solid fa-venus-mars"></i>
+                                        <select id="sex" required>
+                                            <option value="">Select Gender</option>
+                                            <option value="1">Male</option>
+                                            <option value="0">Female</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-actions">
+                                <div></div> <!-- Spacer -->
+                                <button type="button" class="btn btn-primary" onclick="nextStep(2)">Next: Vitals <i
+                                        class="fa-solid fa-arrow-right"></i></button>
+                            </div>
+                        </div>
+
+                        <!-- Step 2: Vitals -->
+                        <div class="form-step" id="step2">
+                            <h3>Vital Signs</h3>
+                            <div class="grid-2">
+                                <div class="form-group">
+                                    <label>Resting Blood Pressure (mmHg)</label>
+                                    <div class="input-wrapper">
+                                        <i class="fa-solid fa-droplet"></i>
+                                        <input type="number" id="resting_blood_pressure" min="50" max="250"
+                                            placeholder="e.g. 120" required>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Cholesterol (mg/dl)</label>
+                                    <div class="input-wrapper">
+                                        <i class="fa-solid fa-burger"></i>
+                                        <input type="number" id="cholesterol" min="100" max="600" placeholder="e.g. 200"
+                                            required>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Max Heart Rate (bpm)</label>
+                                    <div class="input-wrapper">
+                                        <i class="fa-solid fa-heart-pulse"></i>
+                                        <input type="number" id="max_heart_rate" min="40" max="220"
+                                            placeholder="e.g. 150" required>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Fasting Blood Sugar > 120 mg/dl</label>
+                                    <div class="input-wrapper">
+                                        <i class="fa-solid fa-cube"></i>
+                                        <select id="fasting_blood_sugar" required>
+                                            <option value="0">No</option>
+                                            <option value="1">Yes</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-secondary" onclick="prevStep(1)"><i
+                                        class="fa-solid fa-arrow-left"></i> Back</button>
+                                <button type="button" class="btn btn-primary" onclick="nextStep(3)">Next: Clinical <i
+                                        class="fa-solid fa-arrow-right"></i></button>
+                            </div>
+                        </div>
+
+                        <!-- Step 3: Clinical -->
+                        <div class="form-step" id="step3">
+                            <h3>Clinical Measurements</h3>
+                            <div class="grid-2">
+                                <div class="form-group">
+                                    <label>Chest Pain Type</label>
+                                    <div class="input-wrapper">
+                                        <i class="fa-solid fa-lungs"></i>
+                                        <select id="chest_pain_type" required>
+                                            <option value="">Select Type</option>
+                                            <option value="0">Typical Angina</option>
+                                            <option value="1">Atypical Angina</option>
+                                            <option value="2">Non-anginal Pain</option>
+                                            <option value="3">Asymptomatic</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Resting ECG Results</label>
+                                    <div class="input-wrapper">
+                                        <i class="fa-solid fa-wave-square"></i>
+                                        <select id="resting_ecg" required>
+                                            <option value="0">Normal</option>
+                                            <option value="1">ST-T Wave Abnormality</option>
+                                            <option value="2">Left Ventricular Hypertrophy</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Exercise Induced Angina</label>
+                                    <div class="input-wrapper">
+                                        <i class="fa-solid fa-person-running"></i>
+                                        <select id="exercise_induced_angina" required>
+                                            <option value="0">No</option>
+                                            <option value="1">Yes</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>ST Depression (Oldpeak)</label>
+                                    <div class="input-wrapper">
+                                        <i class="fa-solid fa-arrow-trend-down"></i>
+                                        <input type="number" id="st_depression" step="0.1" min="0" max="10"
+                                            placeholder="e.g. 1.0" required>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Slope of Peak Exercise ST</label>
+                                    <div class="input-wrapper">
+                                        <i class="fa-solid fa-chart-line"></i>
+                                        <select id="st_slope" required>
+                                            <option value="0">Upsloping</option>
+                                            <option value="1">Flat</option>
+                                            <option value="2">Downsloping</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Number of Major Vessels (0-3)</label>
+                                    <div class="input-wrapper">
+                                        <i class="fa-solid fa-network-wired"></i>
+                                        <select id="major_vessels" required>
+                                            <option value="0">0</option>
+                                            <option value="1">1</option>
+                                            <option value="2">2</option>
+                                            <option value="3">3</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group span-2">
+                                    <label>Thalassemia</label>
+                                    <div class="input-wrapper">
+                                        <i class="fa-solid fa-dna"></i>
+                                        <select id="thalassemia" required>
+                                            <option value="0">Normal</option>
+                                            <option value="1">Fixed Defect</option>
+                                            <option value="2">Reversible Defect</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-secondary" onclick="prevStep(2)"><i
+                                        class="fa-solid fa-arrow-left"></i> Back</button>
+                                <button type="button" class="btn btn-submit" onclick="submitAssessment()">Analyze Risk
+                                    <i class="fa-solid fa-bolt"></i></button>
+                            </div>
+                        </div>
+                    </form>
+
+                    <!-- Results Dashboard (Hidden Initially) -->
+                    <div id="resultsDashboard" class="results-dashboard hidden">
+                        <div class="results-header">
+                            <button class="btn btn-text" onclick="resetAssessment()"><i
+                                    class="fa-solid fa-arrow-left"></i> New Assessment</button>
+                            <h2>Assessment Results</h2>
+                        </div>
+
+                        <div class="dashboard-grid">
+                            <!-- Risk Gauge Card -->
+                            <div class="dashboard-card risk-card">
+                                <h3>Risk Probability</h3>
+                                <div class="gauge-container">
+                                    <svg class="progress-ring" width="160" height="160">
+                                        <circle class="progress-ring__circle-bg" stroke="#e2e8f0" stroke-width="12"
+                                            fill="transparent" r="70" cx="80" cy="80" />
+                                        <circle class="progress-ring__circle" stroke="var(--primary)" stroke-width="12"
+                                            fill="transparent" r="70" cx="80" cy="80" />
+                                    </svg>
+                                    <div class="gauge-value">
+                                        <span id="riskPercentage">0%</span>
+                                        <span class="gauge-label">Risk</span>
+                                    </div>
+                                </div>
+                                <div id="riskLevelText" class="risk-badge">Low Risk</div>
+                                <p id="riskMessage" class="risk-desc">Your results indicate a low probability of heart
+                                    disease.</p>
+                            </div>
+
+                            <!-- Key Metrics Card -->
+                            <div class="dashboard-card metrics-card">
+                                <h3>Key Metrics</h3>
+                                <div class="metric-item">
+                                    <span class="metric-label">Blood Pressure</span>
+                                    <span class="metric-value" id="resBP">--</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-label">Cholesterol</span>
+                                    <span class="metric-value" id="resChol">--</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-label">Heart Rate</span>
+                                    <span class="metric-value" id="resHR">--</span>
+                                </div>
+                            </div>
+
+                            <!-- Precautions Card -->
+                            <div class="dashboard-card precautions-card span-2">
+                                <h3>Medical Precautions</h3>
+                                <ul id="precautionsList" class="check-list">
+                                    <!-- Populated by JS -->
+                                </ul>
+                            </div>
+
+                            <!-- Diet Plan Card -->
+                            <div class="dashboard-card diet-card span-2">
+                                <h3>Recommended Diet Plan</h3>
+                                <div class="diet-grid">
+                                    <div class="diet-column">
+                                        <h4 class="text-success"><i class="fa-solid fa-check"></i> Recommended Foods
+                                        </h4>
+                                        <ul id="dietEatList" class="diet-list"></ul>
+                                    </div>
+                                    <div class="diet-column">
+                                        <h4 class="text-danger"><i class="fa-solid fa-xmark"></i> Foods to Avoid</h4>
+                                        <ul id="dietAvoidList" class="diet-list"></ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Loading Overlay -->
+                    <div id="loadingOverlay" class="loading-overlay hidden">
+                        <div class="spinner"></div>
+                        <p>Analyzing medical data...</p>
+                    </div>
+
                 </div>
-            `;
+            </div>
 
-            document.getElementById('historyDetails').innerHTML = detailsHTML;
-            document.getElementById('historyModal').classList.add('show');
-        }
+            <!-- History View -->
+            <div id="history" class="view-section">
+                <div class="section-header">
+                    <h2>Assessment History</h2>
+                    <div class="history-controls">
+                        <div class="date-filter">
+                            <i class="fa-solid fa-calendar-day"></i>
+                            <input type="date" id="historyDateFilter" onchange="filterHistory()">
+                        </div>
+                        <button class="btn btn-secondary btn-sm" onclick="loadHistory()">Refresh</button>
+                        <button class="btn btn-danger btn-sm" onclick="clearHistory()">Clear All</button>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table class="data-table" id="historyTable">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Age</th>
+                                <th>BP</th>
+                                <th>Cholesterol</th>
+                                <th>Risk Level</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyBody">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
-        function closeHistoryModal() {
-            document.getElementById('historyModal').classList.remove('show');
-        }
+            <!-- About View -->
+            <div id="about" class="view-section">
+                <div class="about-container">
+                    <div class="about-hero">
+                        <h2>About HeartGuard AI</h2>
+                        <p>Advanced Machine Learning for Cardiac Health Prediction</p>
+                    </div>
+                    <div class="grid-3">
+                        <div class="feature-card">
+                            <i class="fa-solid fa-brain"></i>
+                            <h3>Multi-Model Analysis</h3>
+                            <p>Utilizes an ensemble of 6 powerful algorithms including Random Forest, SVM, and Neural
+                                Networks.</p>
+                        </div>
+                        <div class="feature-card">
+                            <i class="fa-solid fa-shield-heart"></i>
+                            <h3>Preventive Care</h3>
+                            <p>Focuses on early detection and actionable lifestyle changes to prevent heart disease.</p>
+                        </div>
+                        <div class="feature-card">
+                            <i class="fa-solid fa-user-doctor"></i>
+                            <h3>Medical Standards</h3>
+                            <p>Analysis based on standard clinical parameters used by cardiologists worldwide.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-        function getPrecautionsByRiskLevel(riskLevel) {
-            const precautions = {
-                'LOW_RISK': {
-                    'title': '✅ LOW RISK - Maintain Good Health',
-                    'precautions': [
-                        '• Continue regular exercise (30 mins daily)',
-                        '• Maintain healthy weight',
-                        '• Keep blood pressure under control',
-                        '• Regular health check-ups (yearly)',
-                        '• Avoid smoking and excessive alcohol',
-                        '• Manage stress through meditation',
-                        '• Sleep 7-8 hours daily',
-                        '• Monitor cholesterol levels'
-                    ]
-                },
-                'MODERATE_RISK': {
-                    'title': '⚠️ MODERATE RISK - Take Preventive Measures',
-                    'precautions': [
-                        '• Increase exercise to 45 mins daily',
-                        '• Reduce sodium intake significantly',
-                        '• Control weight strictly',
-                        '• Monitor blood pressure daily',
-                        '• Check cholesterol every 3-6 months',
-                        '• Avoid stress and take breaks',
-                        '• Limit alcohol consumption',
-                        '• Consult with cardiologist',
-                        '• Take prescribed medications on time',
-                        '• Monitor blood sugar if diabetic'
-                    ]
-                },
-                'HIGH_RISK': {
-                    'title': '🚨 HIGH RISK - Immediate Medical Attention Required',
-                    'precautions': [
-                        '• CONSULT CARDIOLOGIST IMMEDIATELY',
-                        '• Get ECG and stress test done',
-                        '• Daily blood pressure monitoring',
-                        '• Strict salt restriction (< 1500mg/day)',
-                        '• Exercise only with doctor\'s guidance',
-                        '• Regular medication as prescribed',
-                        '• Monitor any chest pain or discomfort',
-                        '• Keep emergency contact ready',
-                        '• Avoid stressful activities',
-                        '• Weekly health check-ups recommended',
-                        '• Maintain food diary',
-                        '• Regular follow-ups with specialist'
-                    ]
-                }
-            };
-            return precautions[riskLevel] || precautions['MODERATE_RISK'];
-        }
+        </main>
+    </div>
 
-        function getDietPlanByRiskLevel(riskLevel) {
-            const dietPlans = {
-                'LOW_RISK': {
-                    'title': '🥗 BALANCED DIET PLAN',
-                    'foods_to_eat': [
-                        '✓ Fatty fish (salmon, mackerel) - 2x weekly',
-                        '✓ Whole grains and oats daily',
-                        '✓ Fresh fruits - 2-3 servings daily',
-                        '✓ Vegetables - 3-4 servings daily',
-                        '✓ Nuts and seeds - 1 handful daily',
-                        '✓ Legumes and beans - 3x weekly',
-                        '✓ Low-fat dairy products',
-                        '✓ Olive oil for cooking',
-                        '✓ Lean poultry without skin'
-                    ],
-                    'foods_to_avoid': [
-                        '✗ Minimal red meat (1-2 times/month)',
-                        '✗ Limit processed foods',
-                        '✗ Avoid sugary drinks and desserts',
-                        '✗ Reduce saturated fats',
-                        '✗ Minimize salt intake',
-                        '✗ Avoid fried foods',
-                        '✗ No trans fats',
-                        '✗ Limit alcohol'
-                    ]
-                },
-                'MODERATE_RISK': {
-                    'title': '🥬 HEART-HEALTHY DIET PLAN',
-                    'foods_to_eat': [
-                        '✓ Oily fish daily (salmon, sardines, tuna)',
-                        '✓ Whole grains at every meal',
-                        '✓ Leafy greens (spinach, kale) daily',
-                        '✓ Colorful vegetables 4+ servings/day',
-                        '✓ Berries and citrus fruits daily',
-                        '✓ Nuts and seeds 1-2 servings/day',
-                        '✓ Legumes and beans daily',
-                        '✓ Extra virgin olive oil only',
-                        '✓ Garlic and onions (beneficial for heart)',
-                        '✓ Green tea 2-3 cups daily'
-                    ],
-                    'foods_to_avoid': [
-                        '✗ NO red meat',
-                        '✗ Eliminate processed foods',
-                        '✗ NO sugary items',
-                        '✗ NO trans fats or saturated fats',
-                        '✗ VERY LOW salt (< 2g/day)',
-                        '✗ NO fried or fatty foods',
-                        '✗ Minimize dairy (only low-fat)',
-                        '✗ NO alcohol or very minimal',
-                        '✗ NO refined carbohydrates',
-                        '✗ NO fast food or takeouts'
-                    ]
-                },
-                'HIGH_RISK': {
-                    'title': '🏥 STRICT THERAPEUTIC DIET PLAN',
-                    'foods_to_eat': [
-                        '✓ Fatty fish 3-4x weekly (doctor approved)',
-                        '✓ Whole grains & brown rice at every meal',
-                        '✓ Spinach, kale, broccoli daily',
-                        '✓ Red/orange/yellow vegetables (5+ servings)',
-                        '✓ Citrus fruits, berries (3+ servings/day)',
-                        '✓ Legumes & beans with every lunch/dinner',
-                        '✓ Garlic & onions in every meal',
-                        '✓ Extra virgin olive oil for cooking',
-                        '✓ Herbs instead of salt for flavoring',
-                        '✓ Green/herbal tea 3-4 cups daily',
-                        '✓ Water - 8-10 glasses daily',
-                        '✓ Low-sodium broth & soups'
-                    ],
-                    'foods_to_avoid': [
-                        '✗ ABSOLUTELY NO red meat',
-                        '✗ NO processed or packaged foods',
-                        '✗ NO sugar or sweets',
-                        '✗ NO trans or saturated fats',
-                        '✗ ZERO salt (use potassium salt)',
-                        '✗ NO fried, oily, creamy foods',
-                        '✗ NO dairy except skim milk',
-                        '✗ NO alcohol whatsoever',
-                        '✗ NO refined carbohydrates',
-                        '✗ NO fast food, takeouts, or restaurants',
-                        '✗ NO caffeine or energy drinks',
-                        '✗ NO high-sodium condiments'
-                    ]
-                }
-            };
-            return dietPlans[riskLevel] || dietPlans['MODERATE_RISK'];
-        }
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content login-modal-unique">
+            <span class="close-modal" onclick="closeLoginModal()">&times;</span>
+            <div class="login-header">
+                <div class="login-icon-large">
+                    <i class="fa-solid fa-fingerprint"></i>
+                </div>
+                <h2>Secure Access</h2>
+                <p>Enter your credentials to continue</p>
+            </div>
+            <form id="loginForm" onsubmit="handleLogin(event)" class="login-form-styled">
+                <div class="form-group-floating">
+                    <input type="text" id="loginUser" required placeholder=" ">
+                    <label>Username</label>
+                    <i class="fa-solid fa-user icon"></i>
+                </div>
+                <div class="form-group-floating">
+                    <input type="password" id="loginPass" required placeholder=" ">
+                    <label>Password</label>
+                    <i class="fa-solid fa-lock icon"></i>
+                </div>
+                <button type="submit" class="btn btn-primary full-width btn-login-submit">
+                    Sign In <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </form>
+        </div>
+    </div>
 
-        window.onclick = function(event) {
-            const modal = document.getElementById('historyModal');
-            if (event.target === modal) {
-                modal.classList.remove('show');
-            }
-        }
-
-        function clearDatabase() {
-            // require login to clear history
-            fetch('/api/auth-status').then(r=>r.json()).then(js=>{
-                if(!js.logged_in){
-                    // open login modal
-                    openLoginModal();
-                    return;
-                }
-
-                if (confirm('Delete all assessment history?')) {
-                    fetch('/api/clear-history', { method: 'POST' })
-                    .then(response => {
-                        if(response.status === 401) { alert('Unauthorized. Please login.'); return; }
-                        return response.json();
-                    })
-                    .then(data => {
-                        if(data && data.message){
-                            alert(data.message);
-                            document.getElementById('historyContainer').innerHTML = '';
-                        }
-                    });
-                }
-            });
-        }
-
-        // Login modal handlers
-        function openLoginModal(){ document.getElementById('loginModal').classList.add('show'); }
-        function closeLoginModal(){ document.getElementById('loginModal').classList.remove('show'); document.getElementById('loginError').style.display='none'; }
-
-        function login(){
-            const username = document.getElementById('loginUsername').value;
-            const password = document.getElementById('loginPassword').value;
-            fetch('/api/login', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({username, password}) })
-            .then(r => r.json().then(b=>({code:r.status, body:b})))
-            .then(res => {
-                if(res.code === 200){
-                    closeLoginModal();
-                    updateAuthUI(true);
-                } else {
-                    document.getElementById('loginError').style.display='block';
-                    document.getElementById('loginError').innerText = res.body.error || 'Login failed';
-                }
-            }).catch(e=>{ document.getElementById('loginError').style.display='block'; document.getElementById('loginError').innerText = e.message; });
-        }
-
-        function logout(){ fetch('/api/logout', { method:'POST' }).then(()=>{ updateAuthUI(false); }); }
-
-        function updateAuthUI(loggedIn){
-            document.getElementById('loginBtnHeader').style.display = loggedIn ? 'none' : 'inline-block';
-            document.getElementById('logoutBtnHeader').style.display = loggedIn ? 'inline-block' : 'none';
-            document.getElementById('authStatus').innerText = loggedIn ? 'Signed in' : '';
-        }
-
-        // On load, check auth status
-        fetch('/api/auth-status').then(r=>r.json()).then(js=>{ updateAuthUI(js.logged_in); }).catch(()=>{});
-
-        // Ensure correct initial UI state on page load
-        document.addEventListener('DOMContentLoaded', () => {
-            // show only input tab
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            const inputTab = document.getElementById('input');
-            if (inputTab) inputTab.classList.add('active');
-
-            // set first tab button active
-            document.querySelectorAll('.tab-btn').forEach((btn, i) => {
-                btn.classList.toggle('active', i === 0);
-            });
-
-            // hide results and modal
-            const results = document.getElementById('results'); if(results) results.classList.remove('show');
-            const modal = document.getElementById('historyModal'); if(modal) modal.classList.remove('show');
-            const card = document.querySelector('.card'); if(card) card.classList.remove('show-sidebar');
-        });
-    </script>
+    <script src="{{ url_for('static', filename='script.js') }}?v=14"></script>
 </body>
+
 </html>

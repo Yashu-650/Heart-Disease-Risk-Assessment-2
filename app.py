@@ -1,3 +1,4 @@
+
 from flask import Flask, render_template, request, jsonify, session
 import json
 import sqlite3
@@ -18,6 +19,11 @@ app = Flask(
 app.config['JSON_SORT_KEYS'] = False
 # Simple session secret for login - in production use a secure secret and env var
 app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'change-this-secret')
+# Session configuration
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SECURE'] = False  # Set to True in production with HTTPS
+app.config['PERMANENT_SESSION_LIFETIME'] = 3600  # 1 hour
 
 # ==================== PATHS ====================
 BASE_DIR = Path(__file__).parent
@@ -421,25 +427,31 @@ def get_history():
 
 @app.route('/api/login', methods=['POST'])
 def api_login():
-    """Simple login endpoint. In production replace with secure auth."""
+    """Public access login - accepts any valid username/password."""
     try:
         data = request.json or {}
-        username = data.get('username')
-        password = data.get('password')
+        username = data.get('username', '').strip()
+        password = data.get('password', '')
 
-        # Simple single-user check. Use env vars for credentials.
-        expected_user = os.environ.get('APP_USER', 'admin')
-        expected_pass = os.environ.get('APP_PASS', 'admin')
+        # Validate input - require minimum length only
+        if not username or len(username) < 3:
+            print(f"[LOGIN] Failed - Username must be at least 3 characters")
+            return jsonify({'error': 'Username must be at least 3 characters'}), 400
+        
+        if not password or len(password) < 3:
+            print(f"[LOGIN] Failed - Password must be at least 3 characters")
+            return jsonify({'error': 'Password must be at least 3 characters'}), 400
 
-        if username == expected_user and password == expected_pass:
-            session['logged_in'] = True
-            session['user'] = username
-            return jsonify({'message': 'Logged in'}), 200
-        else:
-            return jsonify({'error': 'Invalid credentials'}), 401
+        # PUBLIC ACCESS MODE - Accept any valid username/password
+        # This allows all public users to access the health assessment system
+        session['logged_in'] = True
+        session['user'] = username
+        print(f"[LOGIN] Success - User '{username}' logged in (Public Access)")
+        return jsonify({'message': 'Login successful', 'user': username}), 200
 
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        print(f"[LOGIN] Error: {str(e)}")
+        return jsonify({'error': 'Login failed. Please try again.'}), 500
 
 
 @app.route('/api/logout', methods=['POST'])

@@ -34,6 +34,9 @@
     --app-text: #334155;
     --app-gray: #94a3b8;
 
+    /* Force No Scroll Variant */
+    --no-scroll: hidden;
+
     /* Light/Glass Theme (kept from original as they are used elsewhere) */
     --background: #f0f3f8;
     --card-bg: rgba(255, 255, 255, 0.95);
@@ -63,14 +66,21 @@
 
 body {
     font-family: 'Plus Jakarta Sans', sans-serif;
-    background: var(--ref-bg-light);
-    color: #333;
+    /* Dark Grid Background - Global */
+    background-color: #050a14;
+    background-image:
+        linear-gradient(rgba(0, 198, 251, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 198, 251, 0.05) 1px, transparent 1px);
+    background-size: 40px 40px;
+    background-attachment: fixed;
+    color: #e2e8f0;
+    /* Light Text */
     height: 100vh;
     overflow: hidden;
     position: relative;
 }
 
-/* 3D Background */
+/* 3D Background - Kept as overlay for depth if needed, but making transparent */
 .app-background-3d {
     position: fixed;
     top: 0;
@@ -78,9 +88,7 @@ body {
     width: 100%;
     height: 100%;
     z-index: -1;
-    background:
-        radial-gradient(circle at 10% 10%, rgba(68, 133, 253, 0.1) 0%, transparent 40%),
-        radial-gradient(circle at 90% 90%, rgba(59, 40, 204, 0.1) 0%, transparent 40%);
+    background: radial-gradient(circle at 50% 50%, rgba(68, 133, 253, 0.1) 0%, transparent 60%);
 }
 
 /* Layout - "Floating Dashboard" */
@@ -91,74 +99,509 @@ body {
     position: relative;
 }
 
-/* Mobile Header (Hamburger) */
+/* Mobile Header (Hamburger) - VISIBLE ON ALL SCREENS NOW */
 .mobile-header {
-    display: none;
-    /* Desktop Hidden */
+    display: flex;
+    /* Always visible */
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
-    height: 60px;
-    background: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(10px);
-    z-index: 200;
-    padding: 0 1.5rem;
+    height: 70px;
+    background: rgba(5, 10, 20, 0.9);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(15px);
+    z-index: 1000;
+    /* High z-index to stay on top */
+    padding: 0 2rem;
     align-items: center;
     justify-content: space-between;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    /* Stronger shadow for separation */
 }
 
 .menu-toggle {
-    font-size: 1.5rem;
-    color: var(--ref-purple);
+    font-size: 1.6rem;
+    color: white;
     background: none;
     border: none;
     cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 50%;
+    transition: background 0.2s;
+}
+
+.menu-toggle:hover {
+    background: rgba(0, 0, 0, 0.05);
 }
 
 .brand-mobile {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.8rem;
     font-weight: 800;
-    color: var(--ref-purple);
+    color: white;
+    font-size: 1.2rem;
 }
 
 .logo-icon-sm {
-    width: 30px;
-    height: 30px;
+    width: 36px;
+    height: 36px;
     background: linear-gradient(135deg, var(--ref-blue), var(--secondary));
-    border-radius: 8px;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
-    font-size: 0.8rem;
+    font-size: 1rem;
+    box-shadow: 0 4px 10px rgba(68, 133, 253, 0.3);
 }
 
-/* Sidebar - Reference Design */
+/* Sidebar - Lighter Dark Glass for Better Visibility */
 .sidebar {
-    width: var(--sidebar-width);
-    background: white;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 300px;
+    height: 100vh;
+    background: rgba(30, 41, 59, 1);
+    /* Fully opaque for better branding contrast */
+    backdrop-filter: blur(20px);
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
     padding: 2rem 1.5rem;
+    /* Reduced top padding to move branding up slightly */
     display: flex;
     flex-direction: column;
-    height: 100vh;
     z-index: 1100;
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 5px 0 30px rgba(0, 0, 0, 0.02);
+    /* Increased to stay above fixed header */
+    transform: translateX(-100%);
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 10px 0 50px rgba(0, 0, 0, 0.5);
+}
+
+.sidebar.open {
+    transform: translateX(0);
 }
 
 .close-sidebar {
-    display: none;
+    display: block;
+    /* Always visible in drawer */
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #9ca3af;
+    cursor: pointer;
 }
+
+/* Overlay for Sidebar */
+.sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(2px);
+    z-index: 250;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.sidebar-overlay.active {
+    display: block;
+    opacity: 1;
+}
+
+/* 3D Login Overlay - Dark ECG Theme */
+.intro-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* Dark Grid Background */
+    background-color: #050a14;
+    background-image:
+        linear-gradient(rgba(0, 198, 251, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 198, 251, 0.05) 1px, transparent 1px);
+    background-size: 40px 40px;
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.6s cubic-bezier(0.7, 0, 0.3, 1);
+}
+
+/* ECG Line Decoration */
+.intro-overlay::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent 0%, #00c6fb 20%, #4485fd 50%, #00c6fb 80%, transparent 100%);
+    box-shadow: 0 0 20px #00c6fb, 0 0 40px #4485fd;
+    transform: translateY(-50%);
+    z-index: -1;
+    opacity: 0.8;
+}
+
+/* ECG Pulse Animation Container */
+.intro-overlay::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 100px;
+    background: radial-gradient(ellipse at center, rgba(68, 133, 253, 0.15) 0%, transparent 70%);
+    transform: translateY(-50%);
+    z-index: -1;
+}
+
+
+.intro-overlay.hidden {
+    transform: translateY(-100%);
+    opacity: 0;
+}
+
+.intro-card {
+    background: rgba(16, 23, 42, 0.8);
+    /* Darker Glass */
+    backdrop-filter: blur(20px);
+    padding: 2.5rem;
+    /* Tightened from 3.5rem */
+    border-radius: 32px;
+    text-align: center;
+    box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.6),
+        0 0 0 1px rgba(255, 255, 255, 0.1),
+        inset 0 0 50px rgba(0, 0, 0, 0.2);
+    max-width: 400px;
+    /* Slightly narrower */
+    width: 90%;
+    transform: none;
+    border: none;
+}
+
+.intro-card:hover {
+    transform: translateY(-5px);
+}
+
+.intro-logo {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, var(--ref-blue), #00c6fb);
+    border-radius: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 2.5rem;
+    margin: 0 auto 1.5rem;
+    box-shadow: 0 0 30px rgba(0, 198, 251, 0.4);
+}
+
+.intro-title {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: white;
+    /* Bright White */
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.5px;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.intro-subtitle {
+    font-size: 1rem;
+    color: #94a3b8;
+    margin-bottom: 2.5rem;
+}
+
+.intro-login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+    margin-bottom: 1.5rem;
+}
+
+.input-group-3d {
+    position: relative;
+    width: 100%;
+}
+
+.input-group-3d i {
+    color: #00c6fb;
+}
+
+.input-group-3d input {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 1.1rem 1rem 1.1rem 3rem;
+    color: white;
+}
+
+.input-group-3d input::placeholder {
+    color: #64748b;
+}
+
+.input-group-3d input:focus {
+    background: rgba(0, 0, 0, 0.6);
+    border-color: #00c6fb;
+    box-shadow: 0 0 0 2px rgba(0, 198, 251, 0.2);
+}
+
+.btn-intro {
+    background: linear-gradient(90deg, #4485fd, #00c6fb);
+    border-radius: 16px;
+    padding: 1.1rem;
+    font-size: 1.1rem;
+    color: white;
+    box-shadow: 0 10px 30px rgba(0, 198, 251, 0.3);
+}
+
+.btn-intro:hover {
+    box-shadow: 0 0 40px rgba(0, 198, 251, 0.5);
+    transform: translateY(-2px);
+}
+
+.guest-access a {
+    color: #9ca3af;
+    font-weight: 600;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.2s;
+}
+
+.guest-access a:hover {
+    color: var(--ref-blue);
+}
+
+
+/* Modal - Pure Black Theme */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.95);
+    /* Almost black backdrop */
+    backdrop-filter: blur(12px);
+    animation: fadeIn 0.3s;
+}
+
+.modal.active {
+    display: block;
+}
+
+.modal-content {
+    background: linear-gradient(145deg, #0a0a0a 0%, #141414 100%);
+    /* Pure black gradient */
+    margin: 3% auto;
+    /* Further adjusted for better positioning */
+    padding: 2rem 3.5rem 3.5rem;
+    /* Reduced top padding to 2rem */
+    border: 1px solid rgba(0, 198, 251, 0.15);
+    /* Cyan border */
+    width: 90%;
+    max-width: 450px;
+    border-radius: 32px;
+    box-shadow:
+        0 30px 60px rgba(0, 0, 0, 0.9),
+        0 0 80px rgba(0, 198, 251, 0.08),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+    text-align: center;
+    position: relative;
+    color: white;
+}
+
+.close-modal {
+    color: #475569;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    position: absolute;
+    right: 24px;
+    top: 20px;
+    transition: all 0.2s;
+    z-index: 10;
+}
+
+.close-modal:hover {
+    color: #00c6fb;
+    transform: rotate(90deg);
+}
+
+/* Login Header in Modal */
+.login-header h2 {
+    color: #ffffff;
+    font-weight: 800;
+    font-size: 1.6rem;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.5px;
+}
+
+.login-header p {
+    color: #64748b;
+    margin-bottom: 2.5rem;
+    font-size: 0.95rem;
+}
+
+.login-icon-large {
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(135deg, #00c6fb 0%, #005bea 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    color: white;
+    margin: 0 auto 1.8rem;
+    box-shadow:
+        0 0 60px rgba(0, 198, 251, 0.5),
+        0 0 100px rgba(0, 198, 251, 0.3),
+        0 20px 40px rgba(0, 0, 0, 0.5);
+    animation: pulse-glow 3s ease-in-out infinite;
+    position: relative;
+}
+
+/* Fingerprint Glow Animation */
+@keyframes pulse-glow {
+
+    0%,
+    100% {
+        box-shadow:
+            0 0 60px rgba(0, 198, 251, 0.5),
+            0 0 100px rgba(0, 198, 251, 0.3),
+            0 20px 40px rgba(0, 0, 0, 0.5);
+        transform: scale(1);
+    }
+
+    50% {
+        box-shadow:
+            0 0 80px rgba(0, 198, 251, 0.7),
+            0 0 120px rgba(0, 198, 251, 0.4),
+            0 20px 40px rgba(0, 0, 0, 0.5);
+        transform: scale(1.02);
+    }
+}
+
+
+/* Modal Form Inputs - Black Theme */
+.login-form-styled .form-group-floating {
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+.login-form-styled input {
+    width: 100%;
+    padding: 1.1rem 1rem 1.1rem 3rem;
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    color: #ffffff;
+    font-size: 1rem;
+    outline: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.login-form-styled input::placeholder {
+    color: #475569;
+}
+
+.login-form-styled input:focus {
+    background: rgba(0, 0, 0, 0.8);
+    border-color: #00c6fb;
+    box-shadow:
+        0 0 0 3px rgba(0, 198, 251, 0.15),
+        0 0 20px rgba(0, 198, 251, 0.1);
+}
+
+.login-form-styled label {
+    position: absolute;
+    left: 3rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    /* Brighter for contrast */
+    pointer-events: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 0.95rem;
+}
+
+.login-form-styled input:focus~label,
+.login-form-styled input:not(:placeholder-shown)~label,
+.login-form-styled input:-webkit-autofill~label {
+    top: -10px;
+    left: 1rem;
+    font-size: 0.8rem;
+    color: #00c6fb;
+    background: #0a0a0a;
+    padding: 0 10px;
+    font-weight: 700;
+}
+
+.login-form-styled .icon {
+    position: absolute;
+    left: 1.1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #00c6fb;
+    font-size: 1.1rem;
+    opacity: 0.8;
+}
+
+.btn-login-submit {
+    width: 100%;
+    justify-content: center;
+    padding: 1.1rem;
+    font-size: 1.05rem;
+    margin-top: 1.5rem;
+    background: linear-gradient(90deg, #00c6fb 0%, #005bea 100%);
+    border: none;
+    border-radius: 14px;
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow:
+        0 10px 30px rgba(0, 198, 251, 0.3),
+        0 0 60px rgba(0, 198, 251, 0.2);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-login-submit:hover {
+    transform: translateY(-2px);
+    box-shadow:
+        0 15px 40px rgba(0, 198, 251, 0.4),
+        0 0 80px rgba(0, 198, 251, 0.3);
+}
+
+.btn-login-submit:active {
+    transform: translateY(0);
+}
+
 
 .brand {
     display: flex;
     align-items: center;
     gap: 1rem;
     margin-bottom: 4rem;
+    visibility: visible;
+    opacity: 1;
 }
 
 .logo-icon {
@@ -179,6 +622,9 @@ body {
     font-weight: 900 !important;
     color: #ffffff !important;
     letter-spacing: -0.5px;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
     text-shadow:
         0 2px 10px rgba(255, 255, 255, 0.3),
         0 0 20px rgba(255, 255, 255, 0.2) !important;
@@ -271,6 +717,69 @@ body {
     color: var(--ref-blue);
 }
 
+/* Logged In State for Sidebar */
+.logged-in-state {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 1rem;
+    background: #f0fdf4 !important;
+    /* Light green bg for logged in */
+    border: 1px solid #bbf7d0;
+}
+
+.user-avatar-circle {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.1rem;
+    box-shadow: 0 4px 10px rgba(34, 197, 94, 0.3);
+}
+
+.user-info-text {
+    flex: 1;
+    text-align: left;
+}
+
+.user-name {
+    font-weight: 700;
+    color: #14532d;
+    font-size: 0.95rem;
+    margin: 0;
+}
+
+.user-role {
+    font-size: 0.75rem;
+    color: #166534;
+    margin: 0;
+    opacity: 0.8;
+}
+
+.btn-logout-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: white;
+    border: 1px solid #fee2e2;
+    color: #ef4444;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-logout-icon:hover {
+    background: #fee2e2;
+    transform: rotate(90deg);
+}
+
 /* Login Card Styled as Bottom Widget */
 .login-card {
     background: linear-gradient(135deg, #e3f2fd, #f3e5f5);
@@ -311,19 +820,29 @@ body {
     color: var(--primary);
 }
 
+/* Layout - "Floating Dashboard" */
+.app-container {
+    display: flex;
+    height: 100vh;
+    width: 100%;
+    position: relative;
+    padding-top: 70px;
+    /* Account for fixed mobile-header */
+}
+
 /* Main Content - "Glass Panel" */
 .main-content {
     flex: 1;
-    padding: 2.5rem 3rem;
+    padding: 2rem;
     overflow-y: auto;
+    height: 100%;
+    /* Ensure it takes full height of container */
 }
 
 /* Header */
 .top-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 3rem;
+    display: none;
+    /* Hide old top-bar since we have mobile-header now */
 }
 
 /* User Welcome Header */
@@ -821,25 +1340,35 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background: white;
-    padding: 3rem;
-    border-radius: 30px;
-    width: 400px;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    background: linear-gradient(145deg, #0a0a0a 0%, #141414 100%);
+    padding: 3.5rem;
+    border-radius: 32px;
+    width: 450px;
+    max-width: 90%;
+    border: 1px solid rgba(0, 198, 251, 0.15);
+    box-shadow:
+        0 30px 60px rgba(0, 0, 0, 0.9),
+        0 0 80px rgba(0, 198, 251, 0.08),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.02);
 }
 
 .login-icon-large {
-    width: 80px;
-    height: 80px;
-    margin: 0 auto 1.5rem;
-    background: linear-gradient(135deg, #e0c3fc, #8ec5fc);
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 1.8rem;
+    background: linear-gradient(135deg, #00c6fb 0%, #005bea 100%);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    font-size: 2rem;
+    text-shadow: none;
+    font-size: 2.5rem;
+    box-shadow:
+        0 0 60px rgba(0, 198, 251, 0.5),
+        0 0 100px rgba(0, 198, 251, 0.3),
+        0 20px 40px rgba(0, 0, 0, 0.5);
+    animation: pulse-glow 3s ease-in-out infinite;
 }
 
 /* Lists */
@@ -903,23 +1432,57 @@ body {
 }
 
 .table-container {
-    background: white;
+    background: rgba(15, 23, 42, 0.9);
+    /* Dark background */
     border-radius: var(--radius);
     padding: 1rem;
-    box-shadow: var(--shadow-sm);
-    overflow-x: auto;
+    overflow: auto;
+    box-shadow: var(--shadow-card);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.data-table {
+table {
     width: 100%;
     border-collapse: collapse;
+    color: #e2e8f0;
+    /* Light text for dark background */
 }
 
-.data-table th,
-.data-table td {
+table thead {
+    background: rgba(30, 41, 59, 0.8);
+    /* Dark header */
+    color: white;
+}
+
+table th {
     padding: 1rem;
     text-align: left;
-    border-bottom: 1px solid #f1f5f9;
+    font-weight: 600;
+    color: white;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+table td {
+    padding: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    color: #cbd5e1;
+    /* Light gray text */
+}
+
+table tbody tr {
+    transition: background 0.2s;
+}
+
+table tbody tr:hover {
+    background: rgba(30, 41, 59, 0.4);
+}
+
+.no-records {
+    text-align: center;
+    padding: 3rem;
+    color: #94a3b8;
+    /* Medium gray for no records message */
+    font-size: 1rem;
 }
 
 /* Responsive Mobile */
@@ -951,7 +1514,9 @@ body {
         height: 100%;
         transform: translateX(-100%);
         z-index: 1100;
+        /* Increased to stay above fixed header */
         padding-top: 2rem;
+        /* Consistent padding for branding visibility */
         box-shadow: 10px 0 50px rgba(0, 0, 0, 0.2);
     }
 
