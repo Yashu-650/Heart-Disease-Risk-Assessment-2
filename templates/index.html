@@ -11,8 +11,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=41">
-    <link rel="stylesheet" href="{{ url_for('static', filename='theme.css') }}?v=41">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=42">
+    <link rel="stylesheet" href="{{ url_for('static', filename='theme.css') }}?v=42">
 </head>
 
 <body>
@@ -527,6 +527,48 @@
             </div>
 
         </main>
+    </div>
+
+    <!-- Result Details Modal -->
+    <div id="historyDetailsModal" class="modal">
+        <div class="modal-content history-details-ref">
+            <span class="close-modal" onclick="closeHistoryDetails()">&times;</span>
+            <div class="details-header">
+                <div class="details-icon"><i class="fa-solid fa-file-medical"></i></div>
+                <h2 id="detailsTitle">Assessment Result</h2>
+                <div id="detailsDate" class="details-date-text"></div>
+            </div>
+
+            <div class="details-body">
+                <div class="details-risk-section">
+                    <div id="detailsRiskBadge" class="risk-badge"></div>
+                    <div id="detailsRiskPercent" class="risk-percentage-mini"></div>
+                </div>
+
+                <div class="details-grid">
+                    <div class="detail-item">
+                        <span class="label">Age</span>
+                        <span id="detAge" class="val">--</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="label">Blood Pressure</span>
+                        <span id="detBP" class="val">--</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="label">Cholesterol</span>
+                        <span id="detChol" class="val">--</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="label">Max Heart Rate</span>
+                        <span id="detHR" class="val">--</span>
+                    </div>
+                </div>
+
+                <div class="details-message" id="detailsMsg"></div>
+            </div>
+
+            <button class="btn btn-primary full-width" onclick="closeHistoryDetails()">Close</button>
+        </div>
     </div>
 
     <!-- Login Modal -->

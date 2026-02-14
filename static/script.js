@@ -19,6 +19,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Check auth status
     checkAuthStatus();
+
+    // Initial state for history API
+    history.replaceState({ tab: 'home' }, '', '#home');
+});
+
+// Handle browser back button
+window.addEventListener('popstate', (event) => {
+    if (event.state && event.state.tab) {
+        switchTab(null, event.state.tab, true);
+    }
 });
 
 // Mobile Sidebar Toggle
@@ -72,13 +82,15 @@ function enterApp() {
 }
 
 // Navigation Functions
-// Navigation Functions
-function switchTab(event, tabId) {
+function switchTab(event, tabId, isBack = false) {
+    if (event) event.preventDefault();
+    console.log(`Navigating to: ${tabId}`);
+
     // 1. Update Navigation Bar State
     document.querySelectorAll('.nav-links li').forEach(li => {
         li.classList.remove('active');
-        // Robust way to find the matching nav item
-        if (li.getAttribute('onclick').includes(`'${tabId}'`)) {
+        const onclickAttr = li.getAttribute('onclick');
+        if (onclickAttr && onclickAttr.includes(`'${tabId}'`)) {
             li.classList.add('active');
         }
     });
@@ -88,15 +100,28 @@ function switchTab(event, tabId) {
     const targetView = document.getElementById(tabId);
     if (targetView) {
         targetView.classList.add('active');
+    } else {
+        console.error(`Tab ${tabId} not found`);
     }
 
     // 3. Special Actions
     if (tabId === 'history') loadHistory();
 
-    // 4. Scroll to top
+    // 4. Update History State (for back button)
+    if (!isBack) {
+        history.pushState({ tab: tabId }, '', `#${tabId}`);
+    }
+
+    // 5. Scroll to top
     window.scrollTo(0, 0);
     const mainContent = document.querySelector('.main-content');
     if (mainContent) mainContent.scrollTop = 0;
+
+    // Close sidebar if open (mobile)
+    const sidebar = document.getElementById('sidebar');
+    if (sidebar.classList.contains('open')) {
+        toggleSidebar();
+    }
 }
 
 // Stepper Logic
@@ -328,7 +353,7 @@ function loadHistory() {
                 <td>${row.resting_blood_pressure}</td>
                 <td>${row.cholesterol}</td>
                 <td><span style="${badgeStyle}">${row.risk_level.replace('_', ' ')}</span></td>
-                <td><button class="btn btn-secondary" style="padding:4px 8px; font-size:0.8rem" onclick="alert('Details view coming soon!')">View</button></td>
+                <td><button class="btn btn-secondary" style="padding:4px 8px; font-size:0.8rem; min-width:60px;" onclick='viewDetails(${JSON.stringify(row)})'>View</button></td>
             `;
                 // Store raw date for filtering
                 tr.dataset.date = rowDate.toISOString().split('T')[0];
@@ -342,20 +367,62 @@ function loadHistory() {
 
 function filterHistory() {
     const filterValue = document.getElementById('historyDateFilter').value;
-    const rows = document.querySelectorAll('#historyBody tr');
+    const rows = document.querySelectorAll('#historyBody tr:not(.no-results-row)');
+    const tbody = document.getElementById('historyBody');
 
+    // Remove existing no-results message
+    const existingMsg = document.querySelector('.no-results-row');
+    if (existingMsg) existingMsg.remove();
+
+    let visibleCount = 0;
     rows.forEach(row => {
         if (!filterValue) {
             row.style.display = '';
+            visibleCount++;
             return;
         }
 
         if (row.dataset.date === filterValue) {
             row.style.display = '';
+            visibleCount++;
         } else {
             row.style.display = 'none';
         }
     });
+
+    if (visibleCount === 0) {
+        const noDataRow = document.createElement('tr');
+        noDataRow.className = 'no-results-row';
+        noDataRow.innerHTML = `<td colspan="6" style="text-align:center; padding: 2rem; color: #94a3b8;"><i class="fa-solid fa-magnifying-glass" style="margin-bottom:0.5rem; display:block; font-size:1.2rem;"></i> No assessment records found for this date.</td>`;
+        tbody.appendChild(noDataRow);
+    }
+}
+
+// Result Details Functions
+function viewDetails(data) {
+    const modal = document.getElementById('historyDetailsModal');
+    const date = new Date(data.created_at);
+
+    document.getElementById('detailsDate').innerText = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    document.getElementById('detAge').innerText = data.age;
+    document.getElementById('detBP').innerText = data.resting_blood_pressure + ' mmHg';
+    document.getElementById('detChol').innerText = data.cholesterol + ' mg/dl';
+    document.getElementById('detHR').innerText = data.max_heart_rate + ' bpm';
+
+    const badge = document.getElementById('detailsRiskBadge');
+    badge.innerText = data.risk_level.replace('_', ' ');
+    badge.className = 'risk-badge ' + data.risk_level.toLowerCase().split('_')[0];
+
+    document.getElementById('detailsRiskPercent').innerText = `Risk Percentage: ${data.risk_percentage}%`;
+    document.getElementById('detailsMsg').innerText = `Diagnosis: ${data.risk_percentage >= 50 ? 'Heart Disease Risk Detected' : 'Low Heart Disease Risk'}`;
+
+    modal.classList.add('active');
+    document.body.classList.add('no-scroll');
+}
+
+function closeHistoryDetails() {
+    document.getElementById('historyDetailsModal').classList.remove('active');
+    document.body.classList.remove('no-scroll');
 }
 
 

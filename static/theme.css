@@ -97,24 +97,28 @@ body.no-scroll {
     color: white;
     font-size: 1.25rem;
     letter-spacing: -0.5px;
+    user-select: none;
+}
+
+.brand-mobile span {
     background: linear-gradient(135deg, #fff 0%, #a5b4fc 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
-    user-select: none;
 }
 
 .logo-icon-sm {
-    width: 36px;
-    height: 36px;
+    width: 38px;
+    height: 38px;
     background: linear-gradient(135deg, var(--ref-blue), var(--secondary));
-    border-radius: 10px;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
-    font-size: 1rem;
-    box-shadow: 0 4px 10px rgba(68, 133, 253, 0.3);
+    font-size: 1.1rem;
+    box-shadow: 0 4px 15px rgba(68, 133, 253, 0.4);
+    flex-shrink: 0;
 }
 
 /* Sidebar - Premium Dark Glass (Drawer Mode for All) */
@@ -1866,3 +1870,16 @@ table tbody tr:hover {
 .hidden {
     display: none !important;
 }
+/* History Details Modal Styling */
+.history-details-ref { padding: 2.5rem; max-width: 500px; }
+.details-header { text-align: center; margin-bottom: 2rem; }
+.details-icon { width: 70px; height: 70px; background: rgba(255, 255, 255, 0.05); border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: var(--primary); margin: 0 auto 1.5rem; border: 1px solid rgba(255, 255, 255, 0.1); }
+.details-date-text { color: var(--text-muted); font-size: 0.9rem; margin-top: 0.5rem; }
+.details-risk-section { background: rgba(0, 0, 0, 0.2); padding: 1.5rem; border-radius: 20px; text-align: center; margin-bottom: 2rem; border: 1px solid rgba(255, 255, 255, 0.05); }
+.risk-percentage-mini { margin-top: 0.8rem; font-weight: 700; color: white; }
+.details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 2rem; }
+.detail-item { background: rgba(255, 255, 255, 0.03); padding: 1rem; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.05); }
+.detail-item .label { display: block; font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.4rem; }
+.detail-item .val { font-weight: 700; color: white; font-size: 1.1rem; }
+.details-message { padding: 1.25rem; background: rgba(0, 198, 251, 0.1); border-left: 4px solid var(--primary); border-radius: 8px; margin-bottom: 2rem; font-size: 0.95rem; line-height: 1.5; }
+@media (max-width: 768px) { .history-details-ref { padding: 1.5rem; width: 90% !important; margin: 2rem auto; } .details-grid { grid-template-columns: 1fr; } }
