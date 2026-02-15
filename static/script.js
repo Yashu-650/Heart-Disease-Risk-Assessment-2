@@ -112,9 +112,13 @@ function switchTab(event, tabId, isBack = false) {
     // 1. Update Navigation Bar State
     document.querySelectorAll('.nav-links li').forEach(li => {
         li.classList.remove('active');
-        const onclickAttr = li.getAttribute('onclick');
-        if (onclickAttr && onclickAttr.includes(`'${tabId}'`)) {
-            li.classList.add('active');
+        try {
+            const onclickAttr = String(li.getAttribute('onclick') || '');
+            if (onclickAttr && onclickAttr.includes(`'${tabId}'`)) {
+                li.classList.add('active');
+            }
+        } catch (e) {
+            console.warn('Error matching nav link:', e);
         }
     });
 
@@ -551,6 +555,13 @@ function checkAuthStatus() {
         const welcomeHeader = document.getElementById('welcomeUser');
 
         if (data.logged_in) {
+            // Hide intro if still visible
+            const intro = document.getElementById('introOverlay');
+            if (intro && !intro.classList.contains('hidden')) {
+                intro.classList.add('hidden');
+                document.body.classList.remove('no-scroll');
+            }
+
             // Update Header
             if (welcomeHeader) welcomeHeader.innerText = `Hello, ${data.user}!`;
 
@@ -600,3 +611,250 @@ window.onclick = function (event) {
         modal.style.display = "none";
     }
 }
+
+// ========================= //
+// AI CHATBOT FUNCTIONS
+// ========================= //
+
+function openChatModal() {
+    document.getElementById('aiChatModal').classList.add('active');
+    document.body.classList.add('no-scroll');
+    // Scroll to bottom of chat
+    setTimeout(() => {
+        const chatMessages = document.getElementById('chatMessages');
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }, 100);
+}
+
+function closeChatModal() {
+    document.getElementById('aiChatModal').classList.remove('active');
+    document.body.classList.remove('no-scroll');
+}
+
+function handleChatKeyPress(event) {
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        sendChatMessage();
+    }
+}
+
+function sendQuickMessage(message) {
+    const input = document.getElementById('chatInput');
+    input.value = message;
+    sendChatMessage();
+}
+
+function sendChatMessage() {
+    const input = document.getElementById('chatInput');
+    const message = input.value.trim();
+
+    if (!message) return;
+
+    // Add user message to chat
+    addUserMessage(message);
+
+    // Clear input
+    input.value = '';
+
+    // Hide suggestions after first message
+    const suggestions = document.getElementById('chatSuggestions');
+    if (suggestions) {
+        suggestions.style.display = 'none';
+    }
+
+    // Show typing indicator
+    const typingIndicator = document.getElementById('typingIndicator');
+    typingIndicator.style.display = 'flex';
+
+    // Scroll to bottom
+    scrollChatToBottom();
+
+    // Simulate AI response with delay
+    setTimeout(() => {
+        typingIndicator.style.display = 'none';
+        const aiResponse = generateAIResponse(message);
+        addAIMessage(aiResponse);
+        scrollChatToBottom();
+    }, 1500 + Math.random() * 1000);
+}
+
+function addUserMessage(message) {
+    const chatMessages = document.getElementById('chatMessages');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'chat-message user-message';
+    messageDiv.innerHTML = `
+        <div class="message-avatar">
+            <i class="fa-solid fa-user"></i>
+        </div>
+        <div class="message-content">
+            <p>${escapeHtml(message)}</p>
+        </div>
+    `;
+    chatMessages.appendChild(messageDiv);
+}
+
+function addAIMessage(message) {
+    const chatMessages = document.getElementById('chatMessages');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'chat-message ai-message';
+    messageDiv.innerHTML = `
+        <div class="message-avatar">
+            <i class="fa-solid fa-heart-pulse"></i>
+        </div>
+        <div class="message-content">
+            ${message}
+        </div>
+    `;
+    chatMessages.appendChild(messageDiv);
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function scrollChatToBottom() {
+    const chatMessages = document.getElementById('chatMessages');
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+// AI Response Generator (Simulated - can be replaced with actual API)
+function generateAIResponse(userMessage) {
+    const msg = userMessage.toLowerCase();
+
+    // Keywords and responses
+    const responses = {
+        results: `
+            <p>Your assessment results show your current cardiovascular risk level based on the medical data you provided. Here's what the key indicators mean:</p>
+            <ul>
+                <li><strong>Blood Pressure:</strong> Indicates how hard your heart is working to pump blood</li>
+                <li><strong>Cholesterol:</strong> High levels can lead to plaque buildup in arteries</li>
+                <li><strong>Max Heart Rate:</strong> Shows your heart's response during physical activity</li>
+            </ul>
+            <p>Would you like specific advice based on your risk level?</p>
+        `,
+
+        improve: `
+            <p>Great question! Here are key ways to improve your heart health:</p>
+            <ul>
+                <li><strong>Regular Exercise:</strong> Aim for 150 minutes of moderate aerobic activity per week</li>
+                <li><strong>Heart-Healthy Diet:</strong> Focus on vegetables, fruits, whole grains, and lean proteins</li>
+                <li><strong>Stress Management:</strong> Practice meditation, yoga, or deep breathing</li>
+                <li><strong>Quit Smoking:</strong> If you smoke, consider cessation programs</li>
+                <li><strong>Limit Alcohol:</strong> Keep intake moderate (1-2 drinks per day max)</li>
+                <li><strong>Sleep Well:</strong> Aim for 7-9 hours of quality sleep</li>
+            </ul>
+            <p>Start with one or two changes and build from there!</p>
+        `,
+
+        diet: `
+            <p>A heart-healthy diet is crucial! Here are my recommendations:</p>
+            <p><strong>Foods to Include:</strong></p>
+            <ul>
+                <li>Leafy greens (spinach, kale)</li>
+                <li>Whole grains (oats, brown rice, quinoa)</li>
+                <li>Fatty fish (salmon, mackerel, sardines)</li>
+                <li>Berries (blueberries, strawberries)</li>
+                <li>Nuts and seeds (almonds, walnuts, chia seeds)</li>
+                <li>Legumes (beans, lentils)</li>
+            </ul>
+            <p><strong>Foods to Limit:</strong></p>
+            <ul>
+                <li>Processed foods and fast food</li>
+                <li>Red and processed meats</li>
+                <li>Sugary drinks and desserts</li>
+                <li>Excess salt and sodium</li>
+                <li>Trans fats and saturated fats</li>
+            </ul>
+        `,
+
+        exercise: `
+            <p>Exercise is vital for heart health! Here's what I recommend:</p>
+            <ul>
+                <li><strong>Aerobic Exercise:</strong> Walking, jogging, cycling, swimming - 30 minutes, 5 days/week</li>
+                <li><strong>Strength Training:</strong> 2-3 sessions per week with weights or resistance bands</li>
+                <li><strong>Flexibility:</strong> Yoga or stretching to improve circulation</li>
+                <li><strong>Start Gradually:</strong> If you're new to exercise, begin with 10-minute sessions</li>
+            </ul>
+            <p>Always consult your doctor before starting a new exercise program!</p>
+        `,
+
+        risk: `
+            <p>Heart disease risk factors include:</p>
+            <ul>
+                <li><strong>Modifiable Factors:</strong> High blood pressure, high cholesterol, smoking, obesity, poor diet, lack of exercise, diabetes, excessive alcohol</li>
+                <li><strong>Non-modifiable Factors:</strong> Age, family history, gender</li>
+            </ul>
+            <p>The good news is that many risk factors can be managed through lifestyle changes and medication when needed. Our assessment tool helps identify your current risk level.</p>
+        `,
+
+        symptoms: `
+            <p><strong>⚠️ Warning Signs of Heart Problems:</strong></p>
+            <ul>
+                <li>Chest pain or discomfort (angina)</li>
+                <li>Shortness of breath</li>
+                <li>Pain in neck, jaw, or back</li>
+                <li>Lightheadedness or dizziness</li>
+                <li>Rapid or irregular heartbeat</li>
+                <li>Swelling in legs, ankles, or feet</li>
+            </ul>
+            <p><strong>🚨 If you experience severe chest pain, call emergency services immediately!</strong></p>
+            <p>For non-emergency symptoms, schedule an appointment with your healthcare provider.</p>
+        `,
+
+        medication: `
+            <p>I can provide general information about heart medications, but please consult your doctor for specific medical advice:</p>
+            <ul>
+                <li><strong>Statins:</strong> Lower cholesterol</li>
+                <li><strong>ACE Inhibitors:</strong> Lower blood pressure</li>
+                <li><strong>Beta Blockers:</strong> Reduce heart workload</li>
+                <li><strong>Blood Thinners:</strong> Prevent clots</li>
+            </ul>
+            <p>Never start or stop medication without consulting your healthcare provider!</p>
+        `,
+
+        default: `
+            <p>I'm here to help with heart health questions! I can provide information about:</p>
+            <ul>
+                <li>Understanding your assessment results</li>
+                <li>Heart-healthy diet and nutrition</li>
+                <li>Exercise recommendations</li>
+                <li>Risk factors and prevention</li>
+                <li>General cardiovascular health</li>
+            </ul>
+            <p>What would you like to know more about?</p>
+        `
+    };
+
+    // Match user message to response
+    if (msg.includes('result') || msg.includes('assessment') || msg.includes('score')) {
+        return responses.results;
+    } else if (msg.includes('improve') || msg.includes('better') || msg.includes('health')) {
+        return responses.improve;
+    } else if (msg.includes('diet') || msg.includes('food') || msg.includes('eat') || msg.includes('nutrition')) {
+        return responses.diet;
+    } else if (msg.includes('exercise') || msg.includes('workout') || msg.includes('physical') || msg.includes('activity')) {
+        return responses.exercise;
+    } else if (msg.includes('risk') || msg.includes('factor') || msg.includes('chance')) {
+        return responses.risk;
+    } else if (msg.includes('symptom') || msg.includes('sign') || msg.includes('pain') || msg.includes('warning')) {
+        return responses.symptoms;
+    } else if (msg.includes('medication') || msg.includes('medicine') || msg.includes('drug') || msg.includes('pill')) {
+        return responses.medication;
+    } else if (msg.includes('hello') || msg.includes('hi') || msg.includes('hey')) {
+        return `<p>Hello! I'm Dr. HeartGuard AI, your virtual cardiac health assistant. How can I help you today?</p>`;
+    } else if (msg.includes('thank')) {
+        return `<p>You're welcome! Feel free to ask if you have any more questions about heart health. Take care! ❤️</p>`;
+    } else {
+        return responses.default;
+    }
+}
+
+// Close chat modal on outside click
+window.addEventListener('click', function (event) {
+    const chatModal = document.getElementById('aiChatModal');
+    if (event.target === chatModal) {
+        closeChatModal();
+    }
+});
